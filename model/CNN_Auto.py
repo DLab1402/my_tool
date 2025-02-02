@@ -103,16 +103,16 @@ class CNNA(torch.nn.Module):
 #Test
 if __name__ == "__main__":
 	para = {"BottleNeck":       1, # an array (1,l) or a number
-		    "Structure":        [1,8,16,32,32], # an array (1,N)
+		    "Structure":        [3,8,16,32,32], # an array (1,N)
 			"Encode acfnc":    	"Tanh", # a string 
 			"Decode acfnc":     "Tanh", # a string
-			"Kernel size":      [3,3,3,3,3,3,3,3], # an array (1,N-1)
-			"Stride":           [2,2,2,2,2,2,2,2], # an array (1,N-1)
-			"Padding":          [0,0,0,0,0,0,0,0], # an array (1,N-1)
+			"Kernel size":      [(4,4),(4,4),(2,2),(2,2),(2,2),(2,2),(4,4),(4,4)], # an array (1,N-1)
+			"Stride":           [(2,2),(2,2),(2,2),(2,2),(2,2),(2,2),(2,2),(2,2)], # an array (1,N-1)
+			"Padding":          [(1,1),(1,1),(0,0),(0,0),(0,0),(0,0),(1,1),(1,1)], # an array (1,N-1)
 			"Pooling":          ["Average",[1,1]]
     }
 
-	input_tensor = torch.rand((1,1,482,240))
+	input_tensor = torch.rand((8,3,384,240))
 	model = CNNA(para = para)
 	y = model.forward(input_tensor)
 	model.visualizer()

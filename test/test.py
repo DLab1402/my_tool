@@ -1,1 +1,2 @@
-print(9/2)
+import torch
+print(torch.__version__)
