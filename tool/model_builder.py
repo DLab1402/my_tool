@@ -35,7 +35,9 @@ class simple_training:
 
     def __train_epoch(self, model, device, loss_fn, data, optimizer):
         train_loss = 0.0
+        model.to(device)
         model.train()
+        
         for inputs, labels in data:
             inputs = inputs.to(device)
             labels = labels.to(device)

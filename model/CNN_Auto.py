@@ -54,9 +54,9 @@ class CNNA(torch.nn.Module):
 
 	def pooling_chose(self):
 		if self.para["Pooling"][0] == "Average":
-			return torch.nn.AvgPool2d(kernel_size= self.para["Pooling"][1][0],stride = self.para["Pooling"][1][1])
+			return torch.nn.AvgPool2d(kernel_size= self.para["Pooling"][1][0],stride = self.para["Pooling"][1][1],padding = self.para["Pooling"][1][2])
 		else:
-			return torch.nn.MaxPool2d(kernel_size= self.para["Pooling"][1][0],stride = self.para["Pooling"][1][1])
+			return torch.nn.MaxPool2d(kernel_size= self.para["Pooling"][1][0],stride = self.para["Pooling"][1][1],padding = self.para["Pooling"][1][2])
 	
 	def acfnc_chose(self,name):
 		if name == "ReLU":
@@ -68,7 +68,7 @@ class CNNA(torch.nn.Module):
 		else:
 			return torch.nn.Sigmoid()
 
-	def forward(self, x : torch.Tensor)->torch.Tensor:
+	def forward(self, x):
 		self.vis.clear()
 		out = x
 		self.vis.append(out)
@@ -101,20 +101,20 @@ class CNNA(torch.nn.Module):
 			print(item.shape)
 
 #Test
-if __name__ == "__main__":
-	para = {"BottleNeck":       1, # an array (1,l) or a number
-		    "Structure":        [3,8,16,32,32], # an array (1,N)
-			"Encode acfnc":    	"Tanh", # a string 
-			"Decode acfnc":     "Tanh", # a string
-			"Kernel size":      [(4,4),(4,4),(2,2),(2,2),(2,2),(2,2),(4,4),(4,4)], # an array (1,N-1)
-			"Stride":           [(2,2),(2,2),(2,2),(2,2),(2,2),(2,2),(2,2),(2,2)], # an array (1,N-1)
-			"Padding":          [(1,1),(1,1),(0,0),(0,0),(0,0),(0,0),(1,1),(1,1)], # an array (1,N-1)
-			"Pooling":          ["Average",[1,1]]
-    }
+# if __name__ == "__main__":
+# 	para = {"BottleNeck":       1, # an array (1,l) or a number
+# 		    "Structure":        [3,8,16,32,32], # an array (1,N)
+# 			"Encode acfnc":    	"Tanh", # a string 
+# 			"Decode acfnc":     "Tanh", # a string
+# 			"Kernel size":      [(4,4),(4,4),(2,2),(2,2),(2,2),(2,2),(4,4),(4,4)], # an array (1,N-1)
+# 			"Stride":           [(2,2),(2,2),(2,2),(2,2),(2,2),(2,2),(2,2),(2,2)], # an array (1,N-1)
+# 			"Padding":          [(1,1),(1,1),(0,0),(0,0),(0,0),(0,0),(1,1),(1,1)], # an array (1,N-1)
+# 			"Pooling":          ["Average",[1,1]]
+#     }
 
-	input_tensor = torch.rand((8,3,384,240))
-	model = CNNA(para = para)
-	y = model.forward(input_tensor)
-	model.visualizer()
-	# for p in model.parameters():
-	# 	print(p.numel())
+# 	input_tensor = torch.rand((8,3,384,240))
+# 	model = CNNA(para = para)
+# 	y = model.forward(input_tensor)
+# 	model.visualizer()
+# 	# for p in model.parameters():
+# 	# 	print(p.numel())
