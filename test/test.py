@@ -1,10 +1,5 @@
-import torch
-import torch.nn.functional as F
+arr = [1, 0, 0, 2, 2, 1, 3, 1, 0]
 
-def loss(predict, truth):
-    truth = truth.to(torch.int64)  # Ensure labels are int64 for PyTorch compatibility
-    log_prob = F.log_softmax(predict, dim=1)  # Compute log-softmax
-    loss = -log_prob.gather(dim=1, index=truth.unsqueeze(1)).squeeze(1)  # Gather log probabilities of the correct classes
-    return loss.mean()
+modified_arr = [10 if x in (2,3) else (0 if x not in (0, 10) else x) for x in arr]
 
-print(torch.rand(1,10),torch.rand(1,10))
+print(modified_arr)

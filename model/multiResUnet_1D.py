@@ -260,7 +260,7 @@ class MultiResUnet(torch.nn.Module):
 
 #Test
 if __name__ == "__main__":
-	para = {"Number class":         1,
+	para = {"Number class":         3,
 			"Serie length":         1024, #The length of the 1D data
             "Filter nums":          [32,64,100,128], #The number of filters for each multiresblocks of one side of the model (1xn) 
             "Expand":               [2,2,2,1], #The number of stride (1x[n-1])
@@ -273,7 +273,7 @@ if __name__ == "__main__":
 
 	input_tensor = torch.rand((4, 1, 1024))
 	model = MultiResUnet(para = para, alpha = 1.67)
-	# model.structure_calculate(True)
+	model.structure_calculate(True)
 	y = model.forward(input_tensor)
 	# for p in model.parameters():
 	# 	print(p.numel())
