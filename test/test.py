@@ -1,5 +1,8 @@
-arr = [1, 0, 0, 2, 2, 1, 3, 1, 0]
+import numpy as np
 
-modified_arr = [10 if x in (2,3) else (0 if x not in (0, 10) else x) for x in arr]
+arr = np.array([[[1, 5, 3], [7, 2, 8]]])
+print(arr)
 
-print(modified_arr)
+# Find the index of the max value along axis 1 (row-wise)
+max_indices_row = np.argmax(arr, axis=-2)
+print("Max indices along rows:", max_indices_row)

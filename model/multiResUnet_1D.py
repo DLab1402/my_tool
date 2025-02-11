@@ -1,4 +1,5 @@
 import torch
+import torch.nn.functional as F
 
 class Conv1d_batchnorm(torch.nn.Module):
 	'''
@@ -179,6 +180,7 @@ class MultiResUnet(torch.nn.Module):
 			self.ups_layer.append(torch.nn.ConvTranspose1d(ups[i][0],ups[i][1],kernel_size=2,stride=2))
 
 		self.conv_final = Conv1d_batchnorm(de_str[-1][1], self.para["Number class"], kernel_size = 1, activation='None')
+		self.final_act = torch.nn.Sigmoid()
 	
 	def structure_calculate(self,visualize=False):
 		out_filter = lambda n:int(n*self.alpha*self.para["Filter rate"][0])+int(n*self.alpha*self.para["Filter rate"][1])+int(n*self.alpha*self.para["Filter rate"][2])
@@ -252,6 +254,8 @@ class MultiResUnet(torch.nn.Module):
 
 		out = self.conv_final(d[-1])
 		self.vis.append(out)
+		out = F.softmax(out, dim=-2)
+		self.vis.append(out)
 		return out
 	
 	def visualizer(self):
@@ -271,9 +275,10 @@ if __name__ == "__main__":
 			"Transpose kernel":     [2,2,2,2]	#
     }
 
-	input_tensor = torch.rand((4, 1, 1024))
+	input_tensor = torch.rand((1, 1, 1024))
 	model = MultiResUnet(para = para, alpha = 1.67)
 	model.structure_calculate(True)
 	y = model.forward(input_tensor)
+	model.visualizer()
 	# for p in model.parameters():
 	# 	print(p.numel())
