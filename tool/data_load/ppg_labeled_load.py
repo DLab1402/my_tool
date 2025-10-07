@@ -17,16 +17,18 @@ class PPGDataset(torch.utils.data.Dataset):
         file_list = os.listdir(root)
         self.sig = []
         self.lab = []
-        count = 0
+        self.count = 0
         for file in file_list:
             with open(self.root+"/"+file, 'r') as file:
                 data= json.load(file)
                 if label_list == None:
                     self.sig.append(data["Syn_PPG"])
                     self.lab.append(data["Syn_Label"])
+                    self.count += 1
                 elif label_list == "AR":
                     self.sig.append(data["Syn_PPG"])
-                    self.lab.append([1 if x > 0 else x for x in data["Syn_Label"]])
+                    self.lab.append([1 if x > 0 else 0 for x in data["Syn_Label"]])
+                    self.count += 1
                 elif isinstance(label_list,list):
                     self.sig.append(data["Syn_PPG"])
                     index = []
@@ -57,9 +59,13 @@ class PPGDataset(torch.utils.data.Dataset):
                             index.append(12)
                         elif i == "Other":
                             index.append(13)
+                        if i == "Normal":
+                             index.append(14)
                     l = []
                     for i in index:
-                        l.append([1 if x == i else x for x in data["Syn_Label"]])
+                        l.append([1 if x == i else 0 for x in data["Syn_Label"]])
+                    self.lab.append(l)
+                    self.count += 1
                     
                     
     def __getitem__(self, index):
