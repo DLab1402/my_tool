@@ -6,11 +6,14 @@ import numpy as np
 
 class PPGDataset(torch.utils.data.Dataset):
 
-    def __init__(self, root,preprocessing = None):
+    # lable_list = None --> one array
+    # label_list = "AR" --> yes no
+    # label_list = ["AF","PVC","PAC"] --> spercific
+
+    def __init__(self, root,label_list = None):
         self.root = root
         self.labels = []
         self.signals = []
-        self.processor = preprocessing
         file_list = os.listdir(root)
         self.sig = []
         self.lab = []
@@ -18,21 +21,47 @@ class PPGDataset(torch.utils.data.Dataset):
         for file in file_list:
             with open(self.root+"/"+file, 'r') as file:
                 data= json.load(file)
-                if self.processor == None:
-                    if np.sum(data["Syn_Label"])>0:
-                        self.sig.append(data["Syn_PPG"])
-                        # self.lab.append([1 if x > 0 else x for x in data["Syn_Label"]])
-                        self.lab.append(data["Syn_Label"])
-                    else:
-                        if count < 500:
-                            count = count+1
-                            self.sig.append(data["Syn_PPG"])
-                            self.lab.append([1 if x > 0 else x for x in data["Syn_Label"]])
-                else:
-                    s,l = self.processor(data)
-                    self.sig.append(s)
-                    self.lab.append(l)
-
+                if label_list == None:
+                    self.sig.append(data["Syn_PPG"])
+                    self.lab.append(data["Syn_Label"])
+                elif label_list == "AR":
+                    self.sig.append(data["Syn_PPG"])
+                    self.lab.append([1 if x > 0 else x for x in data["Syn_Label"]])
+                elif isinstance(label_list,list):
+                    self.sig.append(data["Syn_PPG"])
+                    index = []
+                    for i in label_list:
+                        if i == "AF":
+                            index.append(1)
+                        elif i == "PVC":
+                            index.append(2)
+                        elif i == "PAC":
+                            index.append(3)
+                        elif i == "PAC-nhip-doi":
+                            index.append(4)
+                        elif i == "PAC-cap-doi":
+                            index.append(5)
+                        elif i == "PVC-nhip-doi":
+                            index.append(6)
+                        elif i == "PVC-cap-doi":
+                            index.append(7)
+                        elif i == "Block-AV-do-1":
+                            index.append(8)
+                        elif i == "Block-AV-do-2-mobitz-1":
+                            index.append(9)
+                        elif i == "Block-AV-do-2-mobitz-2":
+                            index.append(10)
+                        elif i == "Block-AV-do-3":
+                            index.append(11)
+                        elif i == "Noise":
+                            index.append(12)
+                        elif i == "Other":
+                            index.append(13)
+                    l = []
+                    for i in index:
+                        l.append([1 if x == i else x for x in data["Syn_Label"]])
+                    
+                    
     def __getitem__(self, index):
         signal = torch.tensor([self.sig[index]],dtype=torch.float32)
         label = torch.tensor([self.lab[index]],dtype=torch.float32)
