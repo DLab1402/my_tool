@@ -265,7 +265,7 @@ class MultiResUnet(torch.nn.Module):
 #Test
 if __name__ == "__main__":
 	para = {"Number class":         3,
-			"Serie length":         1024, #The length of the 1D data
+			"Serie length":         800, #The length of the 1D data
             "Filter nums":          [32,64,100,128], #The number of filters for each multiresblocks of one side of the model (1xn) 
             "Expand":               [2,2,2,1], #The number of stride (1x[n-1])
 			"Respath kernel":       3, #The kernel size of each respath (1x1)
@@ -275,7 +275,7 @@ if __name__ == "__main__":
 			"Transpose kernel":     [2,2,2,2]	#
     }
 
-	input_tensor = torch.rand((1, 1, 1024))
+	input_tensor = torch.rand((1, 1, 800))
 	model = MultiResUnet(para = para, alpha = 1.67)
 	model.structure_calculate(True)
 	y = model.forward(input_tensor)

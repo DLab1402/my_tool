@@ -75,3 +75,16 @@ class PPGDataset(torch.utils.data.Dataset):
 
     def __len__(self):
         return len(self.sig)
+    
+    if __name__ == "__main__":
+        from torch.utils.data import Dataset,DataLoader,TensorDataset,random_split,SubsetRandomSampler, ConcatDataset
+        import matplotlib.pyplot as plt
+        from ppg_labeled_load import PPGDataset
+        dataset = PPGDataset('D:\ppg_project\Data\data_train',label_list = "AR")
+        print(dataset.count)
+
+        print(dataset[100][1].shape)
+        for i in [400]:
+            plt.plot(dataset[i][0].numpy().flatten())
+            plt.plot(dataset[i][1].numpy().flatten())
+            plt.show()
