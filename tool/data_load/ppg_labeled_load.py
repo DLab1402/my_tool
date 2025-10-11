@@ -30,7 +30,6 @@ class PPGDataset(torch.utils.data.Dataset):
                     self.lab.append([1 if x > 0 else 0 for x in data["Syn_Label"]])
                     self.count += 1
                 elif isinstance(label_list,list):
-                    self.sig.append(data["Syn_PPG"])
                     index = []
                     for i in label_list:
                         if i == "AF":
@@ -59,14 +58,14 @@ class PPGDataset(torch.utils.data.Dataset):
                             index.append(12)
                         elif i == "Other":
                             index.append(13)
-                        if i == "Normal":
-                             index.append(14)
-                    l = []
-                    for i in index:
-                        l.append([1 if x == i else 0 for x in data["Syn_Label"]])
-                    self.lab.append(l)
-                    self.count += 1
-                    
+                        
+                    if not any((x not in index)&(x!=0) for x in data["Syn_PPG"]):
+                        self.sig.append(data["Syn_PPG"])
+                        l = []
+                        for i in index:
+                            l.append([1 if x == i else 0 for x in data["Syn_Label"]])
+                        self.lab.append(l)
+                        self.count += 1
                     
     def __getitem__(self, index):
         signal = torch.tensor([self.sig[index]],dtype=torch.float32)
