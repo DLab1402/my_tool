@@ -21,12 +21,13 @@ for filename in os.listdir(src_folder):
             
             # Kiểm tra nếu file có key "Valid"
             if "Valid" in data:
-                dst_path = os.path.join(dst_folder, filename)
-                if not os.path.exitsts(dst_path):
-                    shutil.copy(file_path, dst_folder)
-                    print(f"✅ Copied: {filename}")
-                else:
-                    print(f"❌ Skipped (no Valid): {filename}")
+                if data["Valid"] == True:
+                    dst_path = os.path.join(dst_folder, filename)
+                    if not os.path.exitsts(dst_path):
+                        shutil.copy(file_path, dst_folder)
+                        print(f"✅ Copied: {filename}")
+                    else:
+                        print(f"❌ Skipped (no Valid): {filename}")
         
         except Exception as e:
             print(f"⚠️ Error reading {filename}: {e}")
