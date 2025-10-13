@@ -34,6 +34,15 @@ class LeNet(nn.Module):
                                stride=self.para['Stride'][i],
                                padding=self.para['Padding'][i])
             self.Conv_layer.append(conv)
+    def FC_maker(self,in_features):
+        for i in range(self.para['number_of_FC_layer']):
+            if i==0:
+                fc=nn.Linear(in_features=in_features,
+                             out_features=self.para['FC_features'][i])
+            else:
+                fc=nn.Linear(in_features=self.para['FC_features'][i-1],
+                             out_features=self.para['FC_features'][i])
+            self.FC_layer.append(fc)
     def choose_activation(self,para):
         for i in range(self.para['number_of_conv_layer']):
             if para['Activation_Func'][i]=='ReLU':
@@ -62,20 +71,21 @@ class LeNet(nn.Module):
             x=pooling_funcs[i](x,2,2)
         x=torch.flatten(x,1)
         in_features=x.shape[1]
-        fc=nn.Sequential(nn.Linear(in_features,self.para['FC_features'][0]),
-                        nn.ReLU(),
-                        nn.Linear(self.para['FC_features'][0],self.para['FC_features'][1]),
-                        nn.ReLU())
-        x=fc(x)
+        self.FC_maker(in_features)
+        for i in range(self.para['number_of_FC_layer']):
+            x=self.FC_layer[i](x)
+            if i!=self.para['number_of_FC_layer']-1:
+                x=F.relu(x)
+        x=nn.Softmax(dim=1)(x)
         return x
 if __name__=="__main__":
     para={
         'input_channel':1,
         'number_of_conv_layer':2,
         'number_of_FC_layer':2,
-        'FC_features':[120,2],
+        'FC_features':[84,2],
         'output_channel':[6,16],
-        'Kernel_size':[5,5],
+        'Kernel_size':[7,5],
         'Stride':[1,1],
         'Padding':[0,0],
         'Activation_Func':['ReLU','ReLU'],
@@ -85,4 +95,4 @@ if __name__=="__main__":
     x=torch.randn(1,1,32,32)
     y=model(x)
     print(y.shape)
-    
+    print(model)
