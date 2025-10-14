@@ -8,7 +8,7 @@ class PPGDataset(torch.utils.data.Dataset):
 
     # lable_list = None --> one array
     # label_list = "AR" --> yes no
-    # label_list = ["AF","PVC","PAC"] --> spercific
+    # label_list = {"Case": ["AF","PVC","PAC"], "Group": false}
 
     def __init__(self, root,label_list = None):
         self.root = root
@@ -29,9 +29,9 @@ class PPGDataset(torch.utils.data.Dataset):
                     self.sig.append(data["Syn_PPG"])
                     self.lab.append([1 if x > 0 else 0 for x in data["Syn_Label"]])
                     self.count += 1
-                elif isinstance(label_list,list):
-                    index = []
-                    for i in label_list:
+                elif isinstance(label_list,dict):
+                    index = [0]
+                    for i in label_list["Case"]:
                         if i == "AF":
                             index.append(1)
                         elif i == "PVC":
@@ -58,14 +58,21 @@ class PPGDataset(torch.utils.data.Dataset):
                             index.append(12)
                         elif i == "Other":
                             index.append(13)
-                        
-                    if not any((x not in index)&(x!=0) for x in data["Syn_PPG"]):
+
+                    if not any(x not in index for x in data["Syn_Label"]):
                         self.sig.append(data["Syn_PPG"])
                         l = []
                         for i in index:
-                            l.append([1 if x == i else 0 for x in data["Syn_Label"]])
-                        self.lab.append(l)
+                            l.append([1 if x != 0 else 0 for x in data["Syn_Label"]])
+
+                        if label_list["Group"] == True:
+                            result = [1 if sum(values) > 0 else 0 for values in zip(*l)]
+                            self.lab.append(result)
+                        else:
+                            self.lab.append(l)
                         self.count += 1
+                    
+                    
                     
     def __getitem__(self, index):
         signal = torch.tensor([self.sig[index]],dtype=torch.float32)
@@ -79,11 +86,11 @@ class PPGDataset(torch.utils.data.Dataset):
         from torch.utils.data import Dataset,DataLoader,TensorDataset,random_split,SubsetRandomSampler, ConcatDataset
         import matplotlib.pyplot as plt
         from ppg_labeled_load import PPGDataset
-        dataset = PPGDataset('D:\ppg_project\Data\data_train',label_list = "AR")
+        dataset = PPGDataset('D:\ppg_project\Data\data_train',label_list = {"Case":["PAC","PVC"],"Group": True})
         print(dataset.count)
 
-        print(dataset[100][1].shape)
-        for i in [400]:
+        print(dataset[125][1].shape)
+        for i in [134]:
             plt.plot(dataset[i][0].numpy().flatten())
             plt.plot(dataset[i][1].numpy().flatten())
             plt.show()
