@@ -78,6 +78,7 @@ class LeNet(nn.Module):
                 x=F.relu(x)
         x=nn.Softmax(dim=1)(x)
         return x
+    
 if __name__=="__main__":
     para={
         'input_channel':1,
