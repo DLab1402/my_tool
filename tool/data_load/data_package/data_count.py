@@ -30,12 +30,12 @@ for filename in os.listdir(src_folder):
                 print(f"{filename}: NO given keys ")
         
         except Exception as e:
-            print(f"⚠️ Error reading {filename}: {e}")
+            print(f" Error reading {filename}: {e}")
 
 # --- Thống kê ---
 if lengths:
     avg_len = sum(lengths) / len(lengths)
-    print("\n📊 Statistics:")
+    print("\n Statistics:")
     print(f"  - Total files: {len(lengths)}")
     print(f"  - Min length : {min(lengths)}")
     print(f"  - Max length : {max(lengths)}")

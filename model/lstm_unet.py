@@ -153,15 +153,15 @@ class lstm_unet(nn.Module):
 
 # Example usage
 if __name__ =="__main__":
-    para = {"Serie length":         1024,
+    para = {"Serie length":         800,
             "Input size":           1,
             "Hidden size":          100,
             "Number layers":        2,
             "Encoder structure":    [100,64,128,256,512], 
             "Decoder structure":    [512,256,128,64,1],
             "Kernel size":          [3,3,3,3,3,3,3,3,3],
-            "Kernel encoder":       [4,4,4,4],
-            "Kernel decoder":       [2,2,2,2],
+            "Kernel encoder":       [8,8,8,8],
+            "Kernel decoder":       [4,4,4,4],
             "Stride":               [2,2,2,2],
             "Activate function":    nn.Tanh()
     }
