@@ -123,27 +123,25 @@ class lstm_unet(nn.Module):
         e = []
         self.vis.clear()
         out = x.transpose(1, 2)
-        out,_ = self.lstm(out)
-        out = out.transpose(1, 2)
-        self.vis.append(out)
+        # Encoder
         for i,layer in enumerate(self.encoder_layer):
-            # if i == 0:
-            #     out = layer(x)
-            # else:
-            #     out = layer(out)
             out = layer(out)
             e.append(out)
             out = F.max_pool1d(out, kernel_size=self.down_struc[0][i], stride=self.down_struc[1][i],padding=int(self.down_struc[2][i]))
             self.vis.append(out)
-        
+        # Bottleneck 
         out = self.bottleneck(out)
         self.vis.append(out)
-
+        # Decoder
         for i in range(L):
             out = self.upconv_layer[i](out)
             out = torch.cat((out, e[L-i-1]), dim=1)
             out = self.decoder_layer[i](out)
-            self.vis.append(out)
+            self.vis.append(out) 
+        # LSTM
+        out,_ = self.lstm(out)
+        out = out.transpose(1, 2)
+        self.vis.append(out)
 
         return out
     
