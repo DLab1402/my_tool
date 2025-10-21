@@ -93,7 +93,6 @@ class unet_lstm(nn.Module):
         conv = []
         fnc_act = self.para["Activate function"]
         for i in range(len(layer_dims)-1):
-            conv.append(nn.BatchNorm1d(layer_dims[i]))
             conv.append(nn.Conv1d(layer_dims[i], layer_dims[i + 1],kernel_size=kernel_size, padding=int(padding)))
             conv.append(fnc_act)
         return nn.Sequential(*conv)
@@ -119,13 +118,6 @@ class unet_lstm(nn.Module):
             self.decoder_layer.append(self.conv_block(self.conv_struct_format(layer_dims[i][0],layer_dims[i][1]),kernel_size[i],int(padding[i])))
         
     def forward(self, x):
-        if x.dim() == 3 and x.shape[1] < x.shape[2]:
-        # Trường hợp x có dạng (batch, length, channel)
-        # thì đảo lại thành (batch, channel, length)
-            x = x.permute(0, 2, 1)
-        elif x.dim() == 2:
-        # Nếu input là (batch, length), thêm channel = 1
-            x = x.unsqueeze(1)
         L = len(self.conv_e_struc[0])
         e = []
         self.vis.clear()
@@ -171,7 +163,7 @@ if __name__ =="__main__":
     }
 
     input_tensor = torch.rand((4, 1, 1024))
-    model = lstm_unet(para)
+    model = unet_lstm(para)
     model.structure_calculate(True)
     output = model(input_tensor)
     model.visualizer()
