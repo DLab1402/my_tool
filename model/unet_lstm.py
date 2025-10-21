@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-class lstm_unet(nn.Module):
+class unet_lstm(nn.Module):
     
     vis = []
     para = {"Serie length":         [],
@@ -142,7 +142,6 @@ class lstm_unet(nn.Module):
         out,_ = self.lstm(out)
         out = out.transpose(1, 2)
         self.vis.append(out)
-
         return out
     
     def visualizer(self):
