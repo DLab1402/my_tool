@@ -122,7 +122,8 @@ class unet_lstm(nn.Module):
         L = len(self.conv_e_struc[0])
         e = []
         self.vis.clear()
-        out = x.transpose(1, 2)
+        #out = x.transpose(1, 2)
+        out = x
         # Encoder
         for i,layer in enumerate(self.encoder_layer):
             out = layer(out)
@@ -155,7 +156,7 @@ if __name__ =="__main__":
             "Input size":           1,
             "Hidden size":          100,
             "Number layers":        2,
-            "Encoder structure":    [100,64,128,256,512], 
+            "Encoder structure":    [1,64,128,256,512], 
             "Decoder structure":    [512,256,128,64,1],
             "Kernel size":          [3,3,3,3,3,3,3,3,3],
             "Kernel encoder":       [8,8,8,8],
