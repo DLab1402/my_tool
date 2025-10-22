@@ -78,8 +78,8 @@ class unet_lstm(nn.Module):
             [self.para["Kernel decoder"],list(reversed(self.para["Stride"])),list(reversed(padding_decoder))]]
     
     def lstm_block(self):
+        #input_size = self.para['Encoder structure'][-1]
         input_size = 1
-        
         hidden_size = self.para["Hidden size"]
         num_layers = self.para["Number layers"]
         return nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
@@ -133,19 +133,30 @@ class unet_lstm(nn.Module):
         # Bottleneck 
         out = self.bottleneck(out)
         self.vis.append(out)
+        # LSTM
+
+        # #out = out.transpose(1, 2)
+        # out = out.permute(0, 2, 1)
+
+        # out,_ = self.lstm(out)
+        # out = out.permute(0, 2, 1)
+        # #out = out.transpose(1, 2)
+        # self.vis.append(out)
         # Decoder
         for i in range(L):
             out = self.upconv_layer[i](out)
             out = torch.cat((out, e[L-i-1]), dim=1)
             out = self.decoder_layer[i](out)
             self.vis.append(out) 
-        # LSTM
+        # LSTM Behind   
         out = out.transpose(1, 2)
+        # out = out.permute(0, 2, 1)
+
         out,_ = self.lstm(out)
+        # out = out.permute(0, 2, 1)
         out = out.transpose(1, 2)
-        self.vis.append(out)
+        self.vis.append(out) 
         return out
-    
     def visualizer(self):
         for item in self.vis:
             print(item.shape)
@@ -154,7 +165,7 @@ class unet_lstm(nn.Module):
 if __name__ =="__main__":
     para = {"Serie length":         800,
             "Input size":           1,
-            "Hidden size":          100,
+            "Hidden size":          512, # changed hidden size to match with the struct
             "Number layers":        2,
             "Encoder structure":    [1,64,128,256,512], 
             "Decoder structure":    [512,256,128,64,1],
