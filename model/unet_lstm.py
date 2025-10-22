@@ -19,7 +19,7 @@ class unet_lstm(nn.Module):
     }
 
     def __init__(self,para):
-        super(lstm_unet, self).__init__()
+        super(unet_lstm, self).__init__()
         self.encoder_layer = nn.ModuleList()
         self.decoder_layer = nn.ModuleList()
         self.upconv_layer = nn.ModuleList()
@@ -78,7 +78,8 @@ class unet_lstm(nn.Module):
             [self.para["Kernel decoder"],list(reversed(self.para["Stride"])),list(reversed(padding_decoder))]]
     
     def lstm_block(self):
-        input_size = self.para["Input size"]
+        input_size = 1
+        
         hidden_size = self.para["Hidden size"]
         num_layers = self.para["Number layers"]
         return nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
@@ -138,6 +139,7 @@ class unet_lstm(nn.Module):
             out = self.decoder_layer[i](out)
             self.vis.append(out) 
         # LSTM
+        out = out.transpose(1, 2)
         out,_ = self.lstm(out)
         out = out.transpose(1, 2)
         self.vis.append(out)
