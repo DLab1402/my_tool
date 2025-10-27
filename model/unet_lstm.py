@@ -79,7 +79,7 @@ class unet_lstm(nn.Module):
     
     def lstm_block(self):
         #input_size = self.para['Encoder structure'][-1]
-        input_size = 1
+        input_size = 100
         hidden_size = self.para["Hidden size"]
         num_layers = self.para["Number layers"]
         return nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
