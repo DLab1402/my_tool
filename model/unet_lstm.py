@@ -79,7 +79,7 @@ class unet_lstm(nn.Module):
     
     def lstm_block(self):
         #input_size = self.para['Encoder structure'][-1]
-        input_size = 1
+        input_size = 100
         hidden_size = self.para["Hidden size"]
         num_layers = self.para["Number layers"]
         return nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
@@ -136,10 +136,7 @@ class unet_lstm(nn.Module):
         # LSTM
 
         # #out = out.transpose(1, 2)
-        # out = out.permute(0, 2, 1)
-
         # out,_ = self.lstm(out)
-        # out = out.permute(0, 2, 1)
         # #out = out.transpose(1, 2)
         # self.vis.append(out)
         # Decoder
@@ -150,10 +147,7 @@ class unet_lstm(nn.Module):
             self.vis.append(out) 
         # LSTM Behind   
         out = out.transpose(1, 2)
-        # out = out.permute(0, 2, 1)
-
         out,_ = self.lstm(out)
-        # out = out.permute(0, 2, 1)
         out = out.transpose(1, 2)
         self.vis.append(out) 
         return out
