@@ -134,12 +134,8 @@ class unet_lstm(nn.Module):
         out = self.bottleneck(out)
         self.vis.append(out)
         # LSTM
-
         # #out = out.transpose(1, 2)
-        # out = out.permute(0, 2, 1)
-
         # out,_ = self.lstm(out)
-        # out = out.permute(0, 2, 1)
         # #out = out.transpose(1, 2)
         # self.vis.append(out)
         # Decoder
@@ -150,17 +146,13 @@ class unet_lstm(nn.Module):
             self.vis.append(out) 
         # LSTM Behind   
         out = out.transpose(1, 2)
-        # out = out.permute(0, 2, 1)
-
         out,_ = self.lstm(out)
-        # out = out.permute(0, 2, 1)
         out = out.transpose(1, 2)
         self.vis.append(out) 
         return out
     def visualizer(self):
         for item in self.vis:
             print(item.shape)
-
 # Example usage
 if __name__ =="__main__":
     para = {"Serie length":         800,
@@ -175,7 +167,6 @@ if __name__ =="__main__":
             "Stride":               [2,2,2,2],
             "Activate function":    nn.Tanh()
     }
-
     input_tensor = torch.rand((4, 1, 1024))
     model = unet_lstm(para)
     model.structure_calculate(True)
