@@ -7,7 +7,6 @@ class unet_base_1D(nn.Module):
     vis = []
     para = {
         "Serie length":         [],
-        "Input size":           [],
         "Encoder structure":    [],
         "Decoder structure":    [],
         "Kernel size":          [],
@@ -27,13 +26,14 @@ class unet_base_1D(nn.Module):
         self.kernel_sizes = self.para["Kernel size"]
         self.strides = self.para["Stride"]
         self.activation = self.para["Activate function"]
-        self.input_size = self.para["Input size"]
         self.serie_length = self.para["Serie length"]
         self.depth = len(self.encoder_channels) - 1
 
         self.encoder_layers = nn.ModuleList()
         self.decoder_layers = nn.ModuleList()
         self.upconv_layers = nn.ModuleList()
+
+        self.structure_calculate()
 
         def conv_block(in_c, out_c, kernel_size):
             padding = (kernel_size - 1) // 2
@@ -60,7 +60,7 @@ class unet_base_1D(nn.Module):
             self.upconv_layers.append(nn.ConvTranspose1d(up_in, up_out, kernel_size=self.strides[i], stride=self.strides[i]))
             self.decoder_layers.append(conv_block(dec_in, dec_out, self.kernel_sizes[self.depth + 1 + i]))
 
-        self.final_conv = nn.Conv1d(self.decoder_channels[-1], self.input_size, kernel_size=1)
+        # self.final_conv = nn.Conv1d(self.decoder_channels[-1], self.input_size, kernel_size=1)
 
     def forward(self, x):
         self.vis.clear()
@@ -86,11 +86,11 @@ class unet_base_1D(nn.Module):
             out = self.decoder_layers[i](out)
             self.vis.append(out)
 
-        out = self.final_conv(out)
-        self.vis.append(out)
+        # out = self.final_conv(out)
+        # self.vis.append(out)
         return out
 
-    def print_structure(self):
+    def structure_calculate(self):
         Lout = [self.serie_length]
         for s in self.strides:
             Lout.append(int(Lout[-1] / s))
@@ -144,7 +144,7 @@ if __name__ == "__main__":
     input_tensor = torch.rand((4, config["Input size"], config["Serie length"]))
     model = unet_base_1D(config)
     output = model(input_tensor)
-    model.print_structure()
+    model.structure_calculate()
     print(f"\nInput shape:  {input_tensor.shape}")
     print(f"Output shape: {output.shape}")
 

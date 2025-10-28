@@ -202,6 +202,7 @@ class unet_lstm(nn.Module):
         
         # LSTM
         out = out.permute(0, 2, 1)  # (batch, channels, length) -> (batch, length, channels)
+        print(out.shape)
         out, _ = self.lstm(out)
         out = out.permute(0, 2, 1)  # (batch, length, channels) -> (batch, channels, length)
         self.vis.append(out)
@@ -241,11 +242,11 @@ if __name__ == "__main__":
     # With L=5 layers: need 2*5-1 = 9 kernel sizes
     para = {
         "Serie length":         800,  # FIXED: Match input length
-        "Input size":           1,
+        "Input size":           100,
         "Hidden size":          256,   # FIXED: Reduced for efficiency
         "Number layers":        2,
         "Encoder structure":    [1, 32, 64, 128, 256],  # FIXED: Start smaller (L=5)
-        "Decoder structure":    [256, 128, 64, 32, 1],  # Output 1 channel for binary segmentation
+        "Decoder structure":    [256, 128, 64, 32, 100],  # Output 1 channel for binary segmentation
         "Kernel size":          [5, 5, 5, 5, 5, 5, 5, 5, 5],  # FIXED: Need 9 values (2*L-1)
         "Kernel encoder":       [8, 8, 8, 8],  # Need L-1 = 4 values
         "Kernel decoder":       [8, 8, 8, 8],  # Need L-1 = 4 values
@@ -276,4 +277,3 @@ if __name__ == "__main__":
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f"\nTotal parameters: {total_params:,}")
     print(f"Trainable parameters: {trainable_params:,}")
-    
