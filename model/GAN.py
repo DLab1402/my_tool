@@ -25,7 +25,7 @@ class Generator(nn.Module):
     # upsampling factor
     nStride = 1
     # number of conditioning variables:  AF/NON-AF label, mean heart rate, standard deviation of heart rate
-    nCondVar = 3
+    nCondVar = 1
     def __init__(self):
         super(Generator, self).__init__()
         # input is Z, going into a convolution
@@ -102,22 +102,24 @@ class Discriminator(nn.Module):
             nn.LeakyReLU(0.2, inplace = True),
             # state size 72
             nn.Conv1d(dis_out * 8, 1, kernel_size = 8, stride = 1, padding = 0, bias = False),
-            nn.Linear(72,2),
+        )
+        self.pool = nn.AdaptiveAvgPool1d(1)
+        self.fc = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(1, 2),
             nn.Sigmoid()
         )
-
     def forward(self, x):
-        b_size = x.size(0)
-        x = self.model(x).view(b_size, -1)
+        x = self.model(x)        # [B, 1, L]
+        x = self.pool(x)         # [B, 1, 1]
+        x = self.fc(x)           # [B, 2]
         return x
 
 if __name__ == "__main__":
-    # aNet = Discriminator()
-    # input = torch.randn(2,1,1200)
-    #
-    # output = aNet(input)
-    # print(output.size())  # torch.Size([2, 1, 1200])
-
+    aNet = Discriminator()
+    input = torch.randn(2,1,1200)    
+    output = aNet(input)
+    print(output.size())  # torch.Size([2, 1, 1200])
     bNet = Generator()
     input2 = torch.randn(2,1200,1)
     output2 = bNet(input2)
