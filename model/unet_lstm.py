@@ -33,13 +33,17 @@ class unet_lstm(nn.Module):
         self.lstm =  nn.LSTM(para["Input size"], para["Hidden size"], para["Number layers"], batch_first=True)
     
     def structure_calculate(self,visualize=False):
-        
-    
-    def lstm_block(self):
-       
+        if visualize:
+            self.unet.structure_calculate()
         
     def forward(self, x):
-       
+        self.vis = []
+        out = self.unet(x)
+        self.vis.append(self.unet.vis)
+        out, (hn, cn) = self.lstm(out.permute(0,2,1))
+        self.vis.append(out)
+        return out.permute(0,2,1)
+
     def visualizer(self):
         for item in self.vis:
             print(item.shape)

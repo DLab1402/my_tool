@@ -162,7 +162,7 @@ if __name__ =="__main__":
             "Kernel size":          [3,3,3,3,3,3,3,3,3],
             "Kernel encoder":       [4,4,4,4],
             "Kernel decoder":       [2,2,2,2],
-            "Stride":               [2,2,2,2],
+            "Stride":               [3,3,3,3],
             "Activate function":    nn.Tanh()
     }
 
