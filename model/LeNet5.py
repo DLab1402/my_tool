@@ -88,7 +88,7 @@ class LeNet(nn.Module):
             print(f"Conv Layer {i+1}: {self.Conv_layer[i]}")
             if self.para.get('use_batchnorm', False):
                 print(f"    BatchNorm: {self.BatchNorm_layer[i]}")
-            print(f"    Activation: {self.para['Activation_Func'][i]}")
+            print(f"  Activation: {self.para['Activation_Func'][i]}")
             print(f"    Pooling: {self.para['Pooling_type'][i]}(kernel_size=2, stride=2)")
         for i in range(self.para['number_of_FC_layer']):
             print(f"FC Layer {i+1}: {self.FC_layer[i]}")
