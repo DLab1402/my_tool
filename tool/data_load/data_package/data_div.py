@@ -2,21 +2,30 @@ import os
 import shutil
 import random
 import sys
-
-# Thay đổi encoding stdout để hỗ trợ UTF-8 (nếu Python >= 3.7)
+# Encoding stuff
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
 
-# Đường dẫn thư mục nguồn
+# Define source and destination directories
 source_dir = 'D:/ppg_project/Data/valid_data_resampled'
-
-# Tạo thư mục data_train và data_test nếu chưa tồn tại
 train_dir = 'D:/ppg_project/Data/data_train'
 test_dir = 'D:/ppg_project/Data/data_test'
 
-os.makedirs(train_dir, exist_ok=True)
-os.makedirs(test_dir, exist_ok=True)
-
+def clean_directory(directory_path):
+    # create directory if not exists
+    os.makedirs(directory_path, exist_ok=True)    
+    # Delete old files
+    print(f"Clean old files in  {directory_path} ---")
+    deleted_count = 0
+    for item in os.listdir(directory_path):
+        item_path = os.path.join(directory_path, item)
+        # Only delete files, not subdirectories
+        if os.path.isfile(item_path):
+            os.remove(item_path)
+            deleted_count += 1
+            
+clean_directory(train_dir)
+clean_directory(test_dir)
 # Lấy danh sách tất cả file trong thư mục nguồn (chỉ file .json để an toàn)
 files = [f for f in os.listdir(source_dir) if f.endswith('.json')]
 
@@ -38,6 +47,7 @@ for file in train_files:
 # Di chuyển file vào data_test
 for file in test_files:
     src = os.path.join(source_dir, file)
+    #anh hoa x
     dst = os.path.join(test_dir, file)
     shutil.move(src, dst)
     print(f"Di chuyển {file} vào data_test")

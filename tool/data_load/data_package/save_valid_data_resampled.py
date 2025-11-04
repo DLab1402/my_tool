@@ -7,7 +7,7 @@ src_folder = r"D:\ppg_project\Data\valid_data"
 dst_folder = r"D:\ppg_project\Data\valid_data_resampled"
 os.makedirs(dst_folder, exist_ok=True)
 
-chunk_size = 320
+chunk_size = 800
 
 for filename in os.listdir(src_folder):
     if filename.endswith(".json"):
@@ -43,9 +43,9 @@ for filename in os.listdir(src_folder):
                     with open(out_path, "w", encoding="utf-8") as f_out:
                         json.dump(chunk_data, f_out)
 
-                print(f"✅ {filename}: split into {num_chunks} chunks (discarded leftover)")
+                print(f"{filename}: split into {num_chunks} chunks (discarded leftover)")
             else:
-                print(f"❌ {filename} missing one of Syn_PPG / Syn_ECG / Syn_Label")
+                print(f"{filename} missing one of Syn_PPG / Syn_ECG / Syn_Label")
 
         except Exception as e:
-            print(f"⚠️ Error reading {filename}: {e}")
+            print(f"Error reading {filename}: {e}")
