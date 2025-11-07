@@ -1,0 +1,6 @@
+names:
+- AcL
+- NON_ACL
+nc: 2
+train: d:\personal_data\Duy Phan Ig\my_tool\MRI_YOLO\images\train
+val: d:\personal_data\Duy Phan Ig\my_tool\MRI_YOLO\images\val
