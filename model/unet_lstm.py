@@ -41,13 +41,12 @@ class unet_lstm(nn.Module):
     def forward(self, x):
         self.vis = []
         out = self.unet(x)
-        print(out.shape)
         self.vis.append(self.unet.vis)
         
         out, (hn, cn) = self.lstm(out.permute(0,2,1))
         self.vis.append(out)
-        print(out.shape)
-        return out.permute(0,2,1)
+
+        return self.para["Activate function"](out.permute(0,2,1))
 
     def visualizer(self):
         pass
