@@ -1,116 +1,88 @@
+#LeNet Model 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+#     para = {
+#         'input_image_size': (320, 320),
+#         'input_channel': 1,
+#         'number_of_conv_layer':2,
+#         'number_of_fc_layer':2,
+#         'num_classes':2,
+#     }
 
 class LeNet(nn.Module):
     def __init__(self, para):
-        super(LeNet, self).__init__()
-        self.para = para
-        self.Conv_layer = nn.ModuleList()
-        self.BatchNorm_layer = nn.ModuleList()
-        self.FC_layer = nn.ModuleList()
-
-        self.conv_layer_maker()
-        with torch.no_grad():
-            x = torch.randn(1, para['input_channel'], 32, 32)
-            x = self.forward_convs(x)
-            in_features = x.flatten(1).shape[1]
-        self.FC_maker(in_features)
-    def conv_layer_maker(self):
-        for i in range(self.para['number_of_conv_layer']):
-            in_ch = self.para['input_channel'] if i == 0 else self.para['output_channel'][i - 1]
-            out_ch = self.para['output_channel'][i]
-            conv = nn.Conv2d(
-                in_channels=in_ch,
-                out_channels=out_ch,
-                kernel_size=self.para['Kernel_size'][i],
-                stride=self.para['Stride'][i],
-                padding=self.para['Padding'][i]
-            )
+        super(LeNet,self).__init__()
+        self.para=para
+        self.input_image_size=para['input_image_size']
+        self.input_channel=para['input_channel']
+        self.num_conv_layer=para['number_of_conv_layer']
+        self.num_fc_layer=para['number_of_fc_layer']
+        self.fc_feateure=para['fc_feature']
+        self.conv_channels=para['conv_channels']
+        self.Conv_layer=nn.ModuleList()
+        self.FC_layer=nn.ModuleList()
+        self.build_conv_layer()
+        self.build_fc_layer()
+    def build_conv_layer(self):
+        for i in range(self.num_conv_layer):
+            in_channels=self.input_channel if i==0 else self.conv_channels[i-1]
+            out_channels=self.conv_channels[i]
+            conv=nn.Sequential(nn.Conv2d(in_channels,out_channels,kernel_size=7,stride=1,padding=2),
+                               nn.BatchNorm2d(out_channels),
+                               nn.ReLU(),
+                                nn.MaxPool2d(kernel_size=2,stride=2))
             self.Conv_layer.append(conv)
-
-            if self.para.get('use_batchnorm', False):
-                self.BatchNorm_layer.append(nn.BatchNorm2d(out_ch))
-            else:
-                self.BatchNorm_layer.append(None)
-
-    def FC_maker(self, in_features):
-        for i in range(self.para['number_of_FC_layer']):
-            in_f = in_features if i == 0 else self.para['FC_features'][i - 1]
-            fc = nn.Linear(in_f, self.para['FC_features'][i])
-            self.FC_layer.append(fc)
-
-    def choose_activation(self, name):
-        if name == 'ReLU':
-            return F.relu
-        elif name == 'Sigmoid':
-            return torch.sigmoid
-        elif name == 'Tanh':
-            return torch.tanh
-        elif name == 'Softmax':
-            return lambda x: F.softmax(x, dim=1)
-        elif name == 'None' or name is None:
-            return lambda x: x
-        else:
-            raise ValueError(f"Unsupported activation: {name}")
-
-    def choose_pooling(self, name):
-        if name == 'MaxPool':
-            return F.max_pool2d
-        elif name == 'AvgPool':
-            return F.avg_pool2d
-        else:
-            raise ValueError(f"Unsupported pooling: {name}")
-
     def forward_convs(self, x):
-        for i in range(self.para['number_of_conv_layer']):
-            act = self.choose_activation(self.para['Activation_Func'][i])
-            pool = self.choose_pooling(self.para['Pooling_type'][i])
-            x = self.Conv_layer[i](x)
-            if self.para.get('use_batchnorm', False) and self.BatchNorm_layer[i] is not None:
-                x = self.BatchNorm_layer[i](x)
-            x = act(x)
-            x = pool(x, 2, 2)
+        for conv in self.Conv_layer:
+            x = conv(x)
+        return x
+
+    def build_fc_layer(self):
+        in_features=0
+        with torch.no_grad():
+            x=torch.randn(1,self.input_channel,self.input_image_size[0],self.input_image_size[1])
+            x=self.forward_convs(x)
+            in_features=x.flatten(1).shape[1]
+        fc=nn.Sequential(nn.Linear(in_features,self.fc_feateure[0]),
+                         nn.ReLU(),
+                         nn.Linear(self.fc_feateure[0],self.fc_feateure[1]),
+                         nn.Softmax(dim=1))
+        self.FC_layer.append(fc)
+    def forward_fc(self, x):
+        x = x.flatten(1)
+        for fc in self.FC_layer:
+            x = fc(x)
         return x
 
     def forward(self, x):
         x = self.forward_convs(x)
-        x = torch.flatten(x, 1)
-        for i in range(self.para['number_of_FC_layer']):
-            x = self.FC_layer[i](x)
-            act = self.choose_activation(self.para['FC_Activation_Func'][i])
-            x = act(x)
+        x = self.forward_fc(x)
         return x
-
     def summary(self):
-        print("LeNet Model")
-        for i in range(self.para['number_of_conv_layer']):
-            print(f"Conv Layer {i+1}: {self.Conv_layer[i]}")
-            if self.para.get('use_batchnorm', False):
-                print(f"    BatchNorm: {self.BatchNorm_layer[i]}")
-            print(f"  Activation: {self.para['Activation_Func'][i]}")
-            print(f"    Pooling: {self.para['Pooling_type'][i]}(kernel_size=2, stride=2)")
-        for i in range(self.para['number_of_FC_layer']):
-            print(f"FC Layer {i+1}: {self.FC_layer[i]}")
-            print(f"    Activation: {self.para['FC_Activation_Func'][i]}")
+        print("="*40)
+        print(f"{'Layer':<15}{'Output Shape':<20}{'Details'}")
+        print("="*40)
+        for i, conv in enumerate(self.Conv_layer):
+            print(f"Conv{i+1:<10} {str(conv):<20}")
+        for i, fc in enumerate(self.FC_layer):
+            print(f"FC{i+1:<10} {str(fc):<20}")
+        print("="*40)
 
 if __name__ == "__main__":
     para = {
+        'input_image_size': (320, 320),
         'input_channel': 1,
-        'number_of_conv_layer': 2,
-        'number_of_FC_layer': 2,
-        'FC_features': [84, 2],
-        'output_channel': [6, 16],
-        'Kernel_size': [7, 5],
-        'Stride': [1, 1],
-        'Padding': [0, 0],
-        'Activation_Func': ['ReLU', 'ReLU'],
-        'Pooling_type': ['MaxPool', 'MaxPool'],
-        'FC_Activation_Func': ['ReLU', 'Softmax'], 
-        'use_batchnorm': True,
+        'number_of_conv_layer':2,
+        'number_of_fc_layer':2,
+        'num_classes':2,
+        'conv_channels': [6, 16],
+        'fc_feature':[84,2]
     }
+
     model = LeNet(para)
-    x = torch.randn(1, 1, 32, 32)
+    x = torch.randn(1, 1, 320, 320)
     y = model(x)
     print("Output shape:", y.shape)
+    print(f"Predicted class:{y}")
     model.summary()
