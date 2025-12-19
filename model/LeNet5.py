@@ -71,17 +71,17 @@ class LeNet(nn.Module):
 
 if __name__ == "__main__":
     para = {
-        'input_image_size': (320, 320),
+        'input_image_size': (608, 608),
         'input_channel': 1,
-        'number_of_conv_layer':2,
+        'number_of_conv_layer':3,
         'number_of_fc_layer':2,
         'num_classes':2,
-        'conv_channels': [6, 16],
-        'fc_feature':[84,2]
+        'conv_channels': [6, 16,24],
+        'fc_feature':[104,2]
     }
 
     model = LeNet(para)
-    x = torch.randn(1, 1, 320, 320)
+    x = torch.randn(1, 1, 608, 608)
     y = model(x)
     print("Output shape:", y.shape)
     print(f"Predicted class:{y}")
