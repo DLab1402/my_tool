@@ -1,0 +1,28 @@
+wandb_version: 1
+
+batch_size:
+  value: 32
+epoch:
+  value: 5
+lr:
+  value: 0.001
+model_para:
+  value:
+    CNN_channels:
+    - 16
+    - 32
+    FC_neurons:
+    - 128
+    - 64
+    input_image_size:
+    - 28
+    - 28
+    input_size: 1
+    kernel_size:
+    - 3
+    - 3
+    num_CNN_layer: 2
+    num_FC_layer: 2
+    num_classes: 10
+optim:
+  value: Adam

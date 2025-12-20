@@ -1,0 +1,17 @@
+{
+  "os":  "Windows-10-10.0.22621-SP0",
+  "python":  "CPython 3.11.9",
+  "startedAt":  "2025-12-19T14:36:22.003993Z",
+  "program":  "d:\\Project\\ACL\\my_tool\\Tracking_experiments.ipynb",
+  "codePath":  "d:\\Project\\ACL\\my_tool\\Tracking_experiments.ipynb",
+  "codePathLocal":  "Tracking_experiments.ipynb",
+  "git":  {
+    "remote":  "https://github.com/DLab1402/my_tool",
+    "commit":  "c01d421e25e6b54be6c7c4307b152f7a052bb612"
+  },
+  "email":  "baymaxnguyen306@gmail.com",
+  "root":  "d:\\Project\\ACL\\my_tool",
+  "host":  "LAPTOP-FI1VPBM2",
+  "executable":  "d:\\Project\\ACL\\.venv\\Scripts\\python.exe",
+  "writerId":  "bxg4ftjrb7s135b96usti67urih9a5h3"
+}

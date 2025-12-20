@@ -1,0 +1,12 @@
+wandb_version: 1
+
+architecture:
+  value: cnn1
+batch_size:
+  value: 16
+epoch:
+  value: 6
+lr:
+  value: 0.01
+optim:
+  value: Adam

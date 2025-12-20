@@ -1,0 +1,12 @@
+wandb_version: 1
+
+architecture:
+  value: cnn1
+batch_size:
+  value: 16
+epoch:
+  value: 5
+lr:
+  value: 0.001
+optim:
+  value: SGD

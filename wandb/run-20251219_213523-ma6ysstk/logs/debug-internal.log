@@ -1,0 +1,12 @@
+{"time":"2025-12-19T21:35:26.1586935+07:00","level":"INFO","msg":"stream: starting","core version":"0.23.1"}
+{"time":"2025-12-19T21:35:27.0776748+07:00","level":"INFO","msg":"stream: created new stream","id":"ma6ysstk"}
+{"time":"2025-12-19T21:35:27.0781795+07:00","level":"INFO","msg":"handler: started","stream_id":"ma6ysstk"}
+{"time":"2025-12-19T21:35:27.0930618+07:00","level":"INFO","msg":"writer: started","stream_id":"ma6ysstk"}
+{"time":"2025-12-19T21:35:27.0930618+07:00","level":"INFO","msg":"stream: started","id":"ma6ysstk"}
+{"time":"2025-12-19T21:35:27.0930618+07:00","level":"INFO","msg":"sender: started","stream_id":"ma6ysstk"}
+{"time":"2025-12-19T21:35:29.0497323+07:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-12-19T21:35:29.4647468+07:00","level":"INFO","msg":"handler: operation stats","stats":{}}
+{"time":"2025-12-19T21:35:29.4690918+07:00","level":"INFO","msg":"stream: closing","id":"ma6ysstk"}
+{"time":"2025-12-19T21:35:29.4690918+07:00","level":"INFO","msg":"handler: closed","stream_id":"ma6ysstk"}
+{"time":"2025-12-19T21:35:29.4774018+07:00","level":"INFO","msg":"sender: closed","stream_id":"ma6ysstk"}
+{"time":"2025-12-19T21:35:29.4774018+07:00","level":"INFO","msg":"stream: closed","id":"ma6ysstk"}

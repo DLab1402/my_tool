@@ -1,0 +1,34 @@
+2025-12-19 21:41:59,806 INFO    Thread-209 (_run_job):11104 [wandb_setup.py:_flush():80] Current SDK version is 0.23.1
+2025-12-19 21:41:59,806 INFO    Thread-209 (_run_job):11104 [wandb_setup.py:_flush():80] Configure stats pid to 11104
+2025-12-19 21:41:59,806 INFO    Thread-209 (_run_job):11104 [wandb_setup.py:_flush():80] Loading settings from C:\Users\hp\.config\wandb\settings
+2025-12-19 21:41:59,806 INFO    Thread-209 (_run_job):11104 [wandb_setup.py:_flush():80] Loading settings from d:\Project\ACL\my_tool\wandb\settings
+2025-12-19 21:41:59,806 INFO    Thread-209 (_run_job):11104 [wandb_setup.py:_flush():80] Loading settings from environment variables
+2025-12-19 21:41:59,806 INFO    Thread-209 (_run_job):11104 [wandb_init.py:setup_run_log_directory():714] Logging user logs to d:\Project\ACL\my_tool\wandb\run-20251219_214159-peex6w1o\logs\debug.log
+2025-12-19 21:41:59,806 INFO    Thread-209 (_run_job):11104 [wandb_init.py:setup_run_log_directory():715] Logging internal logs to d:\Project\ACL\my_tool\wandb\run-20251219_214159-peex6w1o\logs\debug-internal.log
+2025-12-19 21:41:59,806 INFO    Thread-209 (_run_job):11104 [wandb_init.py:monkeypatch_ipython():633] configuring jupyter hooks <wandb.sdk.wandb_init._WandbInit object at 0x000001A6D24BAD50>
+2025-12-19 21:41:59,806 INFO    Thread-209 (_run_job):11104 [wandb_init.py:init():841] calling init triggers
+2025-12-19 21:41:59,806 INFO    Thread-209 (_run_job):11104 [wandb_init.py:init():846] wandb.init called with sweep_config: {'architecture': 'cnn1', 'batch_size': 16, 'epoch': 6, 'lr': 0.01, 'optim': 'Adam'}
+config: {'_wandb': {}}
+2025-12-19 21:41:59,806 INFO    Thread-209 (_run_job):11104 [wandb_init.py:init():889] starting backend
+2025-12-19 21:42:02,060 INFO    Thread-209 (_run_job):11104 [wandb_init.py:init():892] sending inform_init request
+2025-12-19 21:42:02,065 INFO    Thread-209 (_run_job):11104 [wandb_init.py:init():900] backend started and connected
+2025-12-19 21:42:02,066 INFO    Thread-209 (_run_job):11104 [wandb_run.py:_config_callback():1396] config_cb None None {'architecture': 'cnn1', 'batch_size': 16, 'epoch': 6, 'lr': 0.01, 'optim': 'Adam'}
+2025-12-19 21:42:02,068 INFO    Thread-209 (_run_job):11104 [wandb_run.py:_label_probe_notebook():1334] probe notebook
+2025-12-19 21:42:02,069 INFO    Thread-209 (_run_job):11104 [wandb_run.py:_label_probe_notebook():1344] Unable to probe notebook: 'charmap' codec can't decode byte 0x81 in position 4332: character maps to <undefined>
+2025-12-19 21:42:02,069 INFO    Thread-209 (_run_job):11104 [wandb_init.py:init():970] updated telemetry
+2025-12-19 21:42:02,106 INFO    Thread-209 (_run_job):11104 [wandb_init.py:init():994] communicating run to backend with 90.0 second timeout
+2025-12-19 21:42:02,812 INFO    Thread-209 (_run_job):11104 [wandb_init.py:init():1041] starting run threads in backend
+2025-12-19 21:42:03,061 INFO    Thread-209 (_run_job):11104 [wandb_run.py:_console_start():2521] atexit reg
+2025-12-19 21:42:03,062 INFO    Thread-209 (_run_job):11104 [wandb_run.py:_redirect():2369] redirect: wrap_raw
+2025-12-19 21:42:03,063 INFO    Thread-209 (_run_job):11104 [wandb_run.py:_redirect():2438] Wrapping output streams.
+2025-12-19 21:42:03,063 INFO    Thread-209 (_run_job):11104 [wandb_run.py:_redirect():2461] Redirects installed.
+2025-12-19 21:42:03,066 INFO    Thread-209 (_run_job):11104 [wandb_init.py:init():1081] run started, returning control to user process
+2025-12-19 21:42:03,176 INFO    Thread-209 (_run_job):11104 [wandb_run.py:_config_callback():1396] config_cb None None {'model_para': {'num_classes': 10, 'num_CNN_layer': 2, 'num_FC_layer': 2, 'kernel_size': [3, 3], 'CNN_channels': [16, 32], 'FC_neurons': [128, 64], 'input_size': 1, 'input_image_size': [28, 28]}}
+2025-12-19 21:42:34,730 INFO    Thread-209 (_run_job):11104 [wandb_run.py:_finish():2287] finishing run baymaxnguyen306-ho-chi-minh-city-university-of-technology/MNIST_Classification_WandB/peex6w1o
+2025-12-19 21:42:34,731 INFO    Thread-209 (_run_job):11104 [jupyter.py:save_history():435] not saving jupyter history
+2025-12-19 21:42:34,731 INFO    Thread-209 (_run_job):11104 [jupyter.py:save_ipynb():359] not saving jupyter notebook
+2025-12-19 21:42:34,731 INFO    Thread-209 (_run_job):11104 [wandb_init.py:_jupyter_teardown():618] cleaning up jupyter logic
+2025-12-19 21:42:34,731 INFO    Thread-209 (_run_job):11104 [wandb_run.py:_atexit_cleanup():2486] got exitcode: 0
+2025-12-19 21:42:34,731 INFO    Thread-209 (_run_job):11104 [wandb_run.py:_restore():2468] restore
+2025-12-19 21:42:34,731 INFO    Thread-209 (_run_job):11104 [wandb_run.py:_restore():2474] restore done
+2025-12-19 21:42:37,306 INFO    Thread-209 (_run_job):11104 [wandb_run.py:_footer_sync_info():3862] logging synced files
