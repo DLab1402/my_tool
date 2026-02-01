@@ -7,7 +7,7 @@ from template_gen import temp_find
 
 class data_set_make:
     def __init__(self, link = None):
-        if ~os.isdir(link):
+        if ~os.chdir(link):
             print("The dataset link is nit found")
         self.link = link
 
@@ -39,5 +39,7 @@ class data_set_make:
                     print(e)
                     
 
-
-                
+#Test code 
+if __name__ == "__main__":
+    tester = data_set_make("D:\\ppg_project\\code\\model_build\\my_tool\\test\\0001331_14076356_wave.csv.json")
+    tester.single("D:\\ppg_project\\code\\model_build\\my_tool\\test\\0001331_14076356_wave.csv.json",[2,3,10,6])          
