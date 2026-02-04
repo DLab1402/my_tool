@@ -3,7 +3,7 @@ import torch
 import math
 import numpy as np
 
-class PPGDataset(torch.utils.data.Dataset):
+class TemDataset(torch.utils.data.Dataset):
 
     def __init__(self, root,preprocessing = None):
         self.root = root
