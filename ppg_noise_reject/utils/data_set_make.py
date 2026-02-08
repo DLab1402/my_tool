@@ -2,8 +2,10 @@ import os
 import json
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.widgets import Button
 
 from template_gen import temp_find
+from signal_view import viewer
 
 class data_set_make:
     def __init__(self, link = None):
@@ -12,6 +14,8 @@ class data_set_make:
         self.link = link
 
     def single(self, file = None, visualize = None):
+        peaks = None
+        temp = None
         if file != None:
             temp = None
             with open(file, "r", encoding="utf-8") as f:
@@ -39,8 +43,12 @@ class data_set_make:
 
                 plt.tight_layout()
                 plt.show()
+        return peaks, temp
+    
+    def gui_make(self):
+        
 
 #Test code 
 if __name__ == "__main__":
     tester = data_set_make("test.json")
-    tester.single("test.json",[5,7,10,6])          
+    tester.single("D:/ppg_project/code/model_build/my_tool/ppg_noise_reject/utils/test.json",[5,7,10,6])          

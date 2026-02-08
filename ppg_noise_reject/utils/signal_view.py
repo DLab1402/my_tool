@@ -9,7 +9,7 @@ from matplotlib.widgets import Button
 # SIGNAL VIEWER CLASS
 # ==========================================
 
-class SignalViewer:
+class viewer:
     def __init__(self, fig,
                  top_pos=[0.30, 0.55, 0.65, 0.35],
                  bottom_pos=[0.30, 0.15, 0.50, 0.30],
@@ -102,7 +102,7 @@ ax_tree.set_xticks([])
 ax_tree.set_yticks([])
 ax_tree.set_title("JSON Files")
 
-viewer = SignalViewer(fig)
+viewer = viewer(fig)
 
 # Buttons
 ax_back = fig.add_axes([0.83, 0.30, 0.10, 0.08])
