@@ -2,7 +2,7 @@ import os
 import json
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.widgets import Button
+from matplotlib.widgets import Button, Slider
 
 
 # ==========================================
@@ -11,8 +11,8 @@ from matplotlib.widgets import Button
 
 class SignalViewer:
     def __init__(self, fig,
-                 top_pos=[0.30, 0.55, 0.65, 0.35],
-                 bottom_pos=[0.30, 0.15, 0.50, 0.30],
+                 top_pos=[0.10, 0.55, 0.85, 0.35],
+                 bottom_pos=[0.10, 0.20, 0.65, 0.25],
                  window_size=300):
 
         self.fig = fig
@@ -20,7 +20,6 @@ class SignalViewer:
         self.index = 0
         self.signal = None
 
-        # Create axes
         self.ax_top = fig.add_axes(top_pos)
         self.ax_bottom = fig.add_axes(bottom_pos)
 
@@ -55,7 +54,7 @@ class SignalViewer:
         self.ax_top.plot(x, self.signal)
         self.ax_top.set_title("Full Signal")
 
-        # Highlight zoom region
+        # Highlight zoom area
         self.ax_top.axvspan(self.index,
                             self.index + self.window_size,
                             alpha=0.2)
@@ -72,13 +71,12 @@ class SignalViewer:
 
 
 # ==========================================
-# MAIN APPLICATION
+# CREATE EXAMPLE DATA (AUTO)
 # ==========================================
 
 DATA_FOLDER = "data"
 os.makedirs(DATA_FOLDER, exist_ok=True)
 
-# Auto-create example files if empty
 if len(os.listdir(DATA_FOLDER)) == 0:
     x = np.linspace(0, 20, 2000)
     signals = {
@@ -93,60 +91,51 @@ if len(os.listdir(DATA_FOLDER)) == 0:
 json_files = sorted([f for f in os.listdir(DATA_FOLDER)
                      if f.endswith(".json")])
 
+# ==========================================
+# MAIN FIGURE
+# ==========================================
 
-fig = plt.figure(figsize=(12, 6))
-
-# Left file list
-ax_tree = fig.add_axes([0.05, 0.10, 0.20, 0.80])
-ax_tree.set_xticks([])
-ax_tree.set_yticks([])
-ax_tree.set_title("JSON Files")
+fig = plt.figure(figsize=(12, 7))
 
 viewer = SignalViewer(fig)
 
-# Buttons
-ax_back = fig.add_axes([0.83, 0.30, 0.10, 0.08])
-ax_next = fig.add_axes([0.83, 0.20, 0.10, 0.08])
+# ===== Buttons =====
+ax_back = fig.add_axes([0.80, 0.28, 0.12, 0.07])
+ax_next = fig.add_axes([0.80, 0.20, 0.12, 0.07])
 
 btn_back = Button(ax_back, "Back")
 btn_next = Button(ax_next, "Next")
 
+# ===== File Selection Slider =====
+ax_slider = fig.add_axes([0.10, 0.08, 0.80, 0.05])
+
+file_slider = Slider(
+    ax=ax_slider,
+    label="File Index",
+    valmin=0,
+    valmax=len(json_files) - 1,
+    valinit=0,
+    valstep=1
+)
+
 
 # ==========================================
-# FILE LIST
+# FUNCTIONS
 # ==========================================
 
-def draw_file_list():
-    ax_tree.clear()
-    ax_tree.set_xticks([])
-    ax_tree.set_yticks([])
-    ax_tree.set_title("JSON Files")
-
-    for i, filename in enumerate(json_files):
-        y = 0.95 - i * 0.07
-        ax_tree.text(0.05, y, filename,
-                     transform=ax_tree.transAxes,
-                     verticalalignment='top',
-                     picker=True)
-
-    fig.canvas.draw_idle()
-
-
-def load_json(filename):
+def load_file_by_index(idx):
+    filename = json_files[int(idx)]
     path = os.path.join(DATA_FOLDER, filename)
+
     with open(path, "r") as f:
         data = json.load(f)
 
     viewer.set_signal(data["signal"])
+    fig.suptitle(f"Current File: {filename}", fontsize=12)
 
 
-# ==========================================
-# EVENTS
-# ==========================================
-
-def on_pick(event):
-    filename = event.artist.get_text()
-    load_json(filename)
+def slider_update(val):
+    load_file_by_index(val)
 
 
 def next_event(event):
@@ -157,9 +146,12 @@ def back_event(event):
     viewer.prev_window()
 
 
-fig.canvas.mpl_connect("pick_event", on_pick)
+# Connect events
+file_slider.on_changed(slider_update)
 btn_next.on_clicked(next_event)
 btn_back.on_clicked(back_event)
 
-draw_file_list()
+# Load first file
+load_file_by_index(0)
+
 plt.show()

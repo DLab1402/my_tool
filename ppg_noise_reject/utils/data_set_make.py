@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Button
 
 from template_gen import temp_find
-from ppg_noise_reject.utils.lable_template import viewer
+from ppg_noise_reject.utils.label_template import viewer
 
 class data_set_make:
     def __init__(self, link = None):
@@ -46,7 +46,7 @@ class data_set_make:
         return peaks, temp
     
     def gui_make(self):
-        
+        pass
 
 #Test code 
 if __name__ == "__main__":
