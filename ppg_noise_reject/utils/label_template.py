@@ -13,20 +13,20 @@ from template_gen import temp_find
 
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+from matplotlib.patches import Rectangle
 
 
 # ======================
 # Matplotlib Canvas
 # ======================
 class MplCanvas(FigureCanvas):
-    __cur_data = None
     def __init__(self):
         self.fig = Figure()
         self.ax = self.fig.add_subplot(111)
 
         super().__init__(self.fig)
 
-        # 🔥 Tell Qt this widget wants all available space
+        #Tell Qt this widget wants all available space
         self.setSizePolicy(
             QSizePolicy.Policy.Expanding,
             QSizePolicy.Policy.Expanding
@@ -38,17 +38,24 @@ class MplCanvas(FigureCanvas):
 # ======================
 class MainWindow(QWidget):
     cur_data = None
+    cur_sig = None
+    cur_label = None
+    cur_peak = None
+    cur_temp = None
+    cur_index = 0
+    cur_valid = None
     def __init__(self,data_path):
         super().__init__()
         self.setWindowTitle("Correct Layout Viewer")
         self.resize(1000, 700)
-
+        self.cur_rect = Rectangle((0, 0), 1, 1, edgecolor='red', alpha=0.3)
         self.data_path = data_path
 
         main_layout = QVBoxLayout(self)
 
         # -------- Plot 1 (Top Full Width) --------
         self.plot1 = MplCanvas()
+        self.plot1.ax.set_ylim(-0.2, 1.2)
         main_layout.addWidget(self.plot1, 1)
 
         # -------- Bottom Row (List + Plot2 + Buttons) --------
@@ -63,6 +70,8 @@ class MainWindow(QWidget):
 
         # Plot 2
         self.plot2 = MplCanvas()
+        self.plot2.ax.set_ylim(-0.2, 1.2)
+        # self.plot2.ax.set_xlim(0, 100)
         bottom_row.addWidget(self.plot2, 1)
 
         # Buttons
@@ -81,6 +90,10 @@ class MainWindow(QWidget):
 
         main_layout.addLayout(bottom_row, 1)
 
+        self.back_btn.clicked.connect(self.back_action)
+        self.next_btn.clicked.connect(self.next_action)  
+        self.mid_btn.clicked.connect(self.verified_action)
+
     # ======================
     # Load JSON list
     # ======================
@@ -93,6 +106,7 @@ class MainWindow(QWidget):
     # Load JSON file
     # ======================
     def load_json(self, item):
+        self.plot1.ax.clear()
         file_path = os.path.join(self.data_path, item.text())
         
         try:
@@ -105,46 +119,97 @@ class MainWindow(QWidget):
             self.cur_sig = [(x - min_val)/(max_val - min_val) for x in self.cur_data["Syn_PPG"]]
             self.cur_label = [1 if x > 1 else x for x in self.cur_data["Syn_Label"]]
             self.cur_peak = [[],[]]
+            self.cur_valid = []
             if "Template" in self.cur_data:
                 self.cur_temp = self.cur_data["Template"]
                 for item in self.cur_data["Template"]:
                     self.cur_peak[0].append(item["Pos"][0])
-                self.cur_peak[0].append(self.cur_data["Template"][-1]["Pos"][0])
-                self.cur_peak[1] = self.cur_sig[self.cur_peak[0]]
+                    if item["Valid"] == True:
+                        color = 'green'
+                    elif item["Valid"] == False:
+                        color = 'red'
+                    else:
+                        color = 'none'
+                    valid_rec = Rectangle((item["Pos"][0], 0), item["Pos"][1]-item["Pos"][0], 1, facecolor= color, edgecolor='none', alpha=0.3)
+                    self.cur_valid.append(valid_rec)
+                    self.plot1.ax.add_patch(valid_rec)
 
+                self.cur_peak[0].append(self.cur_data["Template"][-1]["Pos"][0])
+                self.cur_peak[1] = [self.cur_sig[i] for i in self.cur_peak[0]]
+                
             else:
                 templates = []
                 peak,temp = temp_find(self.cur_sig).temping()
                 print(temp)
                 for i in range(len(temp)):
                     templates.append({"Pos": [peak[i],peak[i+1]], "Valid": None, "Temp": temp[i]})
+                    self.cur_peak[0].append(peak[i])
+                    valid_rec = Rectangle((templates[-1]["Pos"][0], 0), templates[-1]["Pos"][1]-templates[-1]["Pos"][0], 1, facecolor='none', edgecolor='none', alpha=0.3)
+                    self.cur_valid.append(valid_rec)
+                    self.plot1.ax.add_patch(valid_rec)
 
                 self.cur_data["Template"] = templates
+                self.cur_peak[0].append(peak[-1])
+                self.cur_peak[1] = [self.cur_sig[i] for i in self.cur_peak[0]]
 
             self.plot1_handle()
+            self.plot2_handle(self.cur_data["Template"][0]["Temp"])
 
         except Exception as e:
             print("Error:", e)
 
     # ======================
-    # Example initial plot
+    # Button Actions
+    # ======================
+
+    def back_action(self):
+        if self.cur_index > 0:
+            self.cur_index -= 1
+            self.cur_rect.set_x(self.cur_data["Template"][self.cur_index]["Pos"][0])    
+            self.plot2_handle(self.cur_data["Template"][self.cur_index]["Temp"])
+            self.plot1.draw()
+
+    def next_action(self):
+        if self.cur_index < len(self.cur_data["Template"]) - 1:
+            self.cur_index += 1
+            self.cur_rect.set_x(self.cur_data["Template"][self.cur_index]["Pos"][0])    
+            self.plot2_handle(self.cur_data["Template"][self.cur_index]["Temp"])
+            self.plot1.draw()
+
+    def verified_action(self):
+        print("Verified button clicked")
+
+    # ======================
+    # Plot functions
     # ======================
     def plot1_handle(self):
         x = np.linspace(0, len(self.cur_sig))
-        self.plot1.ax.clear()
         self.plot1.ax.plot(np.array(self.cur_sig))
-        self.plot1.ax.plot(np.array(self.cur_label), color = "red")
-        # self.plot2.ax.plot(np.cos())
+        self.plot1.ax.plot(self.cur_peak[0], self.cur_peak[1], 
+             marker='o', 
+             linestyle='None',   
+             color='green',     
+             markerfacecolor='green')  
 
-        # self.plot1.draw()
+        self.plot1.ax.plot(np.array(self.cur_label), color = "red")
         self.plot1.draw()
 
+    def plot2_handle(self,temp):
+        self.plot2.ax.clear()
+        self.plot2.ax.plot(np.array(temp))
+        self.plot2.draw()   
+
+    # ======================
+    # Plot functions
+    # ======================
+
+    
 
 # ======================
 # Run
 # ======================
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = MainWindow("D:/ppg_project/Data/valid_data_8_2_26")
+    window = MainWindow("D:/my_project/valid_data")
     window.show()
     sys.exit(app.exec())
