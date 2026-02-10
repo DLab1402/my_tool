@@ -30,9 +30,6 @@ class data_set_make:
                 plt.plot(temper.ppg)
                 plt.plot(peaks, y_peaks, "o")
                 plt.show()
-                plt.plot(temper.no_base)
-                plt.plot(peaks, y_peaks, "o")
-                plt.show()
                 fig, axes = plt.subplots(rows, cols, figsize=(visualize[2],visualize[3]))
 
                 for i,sig in enumerate(temp):
@@ -53,4 +50,4 @@ class data_set_make:
 #Test code 
 if __name__ == "__main__":
     tester = data_set_make("test.json")
-    tester.single("D:/ppg_project/code/model_build/my_tool/ppg_noise_reject/utils/test.json",[5,7,10,6])          
+    tester.single("D:/my_project/my_tool/ppg_noise_reject/utils/test.json",[5,7,10,6])          

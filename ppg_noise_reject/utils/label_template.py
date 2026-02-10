@@ -299,6 +299,7 @@ class MainWindow(QWidget):
 # ======================
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = MainWindow("D:/ppg_project/Data/valid_data_8_2_26")
+    # window = MainWindow("D:/ppg_project/Data/valid_data_8_2_26")
+    window = MainWindow("D:/my_project/valid_data_8_2_26")
     window.show()
     sys.exit(app.exec())

@@ -1,19 +1,19 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.interpolate import CubicSpline
+import matplotlib.pyplot as plt
 
-# sample data
+# Sample data
 x = np.array([0, 1, 2, 3, 4])
 y = np.array([0, 1, 0, 1, 0])
 
-# create spline
+# Create spline
 cs = CubicSpline(x, y)
 
-# smooth x values
-x_smooth = np.linspace(0, 4, 200)
-y_smooth = cs(x_smooth)
+# Evaluate on finer grid
+x_fine = np.linspace(0, 4, 200)
+y_fine = cs(x_fine)
 
-# plot
-plt.plot(x, y, 'o')          # original points
-plt.plot(x_smooth, y_smooth) # spline curve
+plt.plot(x, y, 'o', label="data")
+plt.plot(x_fine, y_fine, label="cubic spline")
+plt.legend()
 plt.show()
