@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import (
     QPushButton, QListWidget, QLabel
 )
 
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QSizePolicy
 from template_gen import temp_find
 
@@ -21,12 +22,14 @@ from matplotlib.patches import Rectangle
 # ======================
 class MplCanvas(FigureCanvas):
     def __init__(self):
-        self.fig = Figure()
+        self.fig = Figure(figsize=(14, 7), dpi=100)
         self.ax = self.fig.add_subplot(111)
+
+        # 🔥 remove big margins
+        self.fig.subplots_adjust(left=0.05, right=0.98, top=0.95, bottom=0.08)
 
         super().__init__(self.fig)
 
-        #Tell Qt this widget wants all available space
         self.setSizePolicy(
             QSizePolicy.Policy.Expanding,
             QSizePolicy.Policy.Expanding
@@ -44,10 +47,13 @@ class MainWindow(QWidget):
     cur_temp = None
     cur_index = 0
     cur_valid = None
+    cur_file = None
     def __init__(self,data_path):
         super().__init__()
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setFocus()
         self.setWindowTitle("Correct Layout Viewer")
-        self.resize(1000, 700)
+        self.resize(1400, 700)
         self.cur_rect = Rectangle((0, 0), 1, 1, edgecolor='red', alpha=0.3)
         self.data_path = data_path
 
@@ -77,12 +83,18 @@ class MainWindow(QWidget):
         # Buttons
         button_layout = QVBoxLayout()
         self.back_btn = QPushButton("Back")
-        self.mid_btn = QPushButton("Button")
         self.next_btn = QPushButton("Next")
+        self.error_btn = QPushButton("Mark as error")
+        self.undefined_btn = QPushButton("Mark as undefined")
+        self.valid_btn = QPushButton("Mark as valid")
+        self.save_btn = QPushButton("Save")
 
         button_layout.addWidget(self.back_btn)
         button_layout.addWidget(self.next_btn)
-        button_layout.addWidget(self.mid_btn)
+        button_layout.addWidget(self.error_btn)
+        button_layout.addWidget(self.undefined_btn)
+        button_layout.addWidget(self.valid_btn)
+        button_layout.addWidget(self.save_btn)
         
         button_layout.addStretch()
 
@@ -92,7 +104,10 @@ class MainWindow(QWidget):
 
         self.back_btn.clicked.connect(self.back_action)
         self.next_btn.clicked.connect(self.next_action)  
-        self.mid_btn.clicked.connect(self.verified_action)
+        self.error_btn.clicked.connect(self.error_action)
+        self.undefined_btn.clicked.connect(self.undefined_action)
+        self.valid_btn.clicked.connect(self.undefined_action)
+        self.save_btn.clicked.connect(self.save_action)
 
     # ======================
     # Load JSON list
@@ -107,10 +122,11 @@ class MainWindow(QWidget):
     # ======================
     def load_json(self, item):
         self.plot1.ax.clear()
-        file_path = os.path.join(self.data_path, item.text())
+        self.cur_index = 0
+        self.cur_file = os.path.join(self.data_path, item.text())
         
         try:
-            with open(file_path, "r") as f:
+            with open(self.cur_file, "r") as f:
                 self.cur_data = json.load(f)
 
             min_val = min(self.cur_data["Syn_PPG"])
@@ -124,25 +140,33 @@ class MainWindow(QWidget):
                 self.cur_temp = self.cur_data["Template"]
                 for item in self.cur_data["Template"]:
                     self.cur_peak[0].append(item["Pos"][0])
-                    if item["Valid"] == True:
-                        color = 'green'
-                    elif item["Valid"] == False:
+                    if item["Valid"] == 1:
+                        color = 'none'
+                    elif item["Valid"] == 0:
                         color = 'red'
                     else:
-                        color = 'none'
+                        color = 'gray'
                     valid_rec = Rectangle((item["Pos"][0], 0), item["Pos"][1]-item["Pos"][0], 1, facecolor= color, edgecolor='none', alpha=0.3)
                     self.cur_valid.append(valid_rec)
                     self.plot1.ax.add_patch(valid_rec)
 
                 self.cur_peak[0].append(self.cur_data["Template"][-1]["Pos"][0])
                 self.cur_peak[1] = [self.cur_sig[i] for i in self.cur_peak[0]]
-                
+
+                self.plot1.ax.text(
+                    0.98, 0.98,
+                    "SAVED",
+                    transform=self.plot1.ax.transAxes,
+                    ha="right",
+                    va="top",
+                    fontsize=14,
+                    color="green")
+
             else:
                 templates = []
                 peak,temp = temp_find(self.cur_sig).temping()
-                print(temp)
                 for i in range(len(temp)):
-                    templates.append({"Pos": [peak[i],peak[i+1]], "Valid": None, "Temp": temp[i]})
+                    templates.append({"Pos": [peak[i],peak[i+1]], "Valid": 1, "Temp": temp[i]})
                     self.cur_peak[0].append(peak[i])
                     valid_rec = Rectangle((templates[-1]["Pos"][0], 0), templates[-1]["Pos"][1]-templates[-1]["Pos"][0], 1, facecolor='none', edgecolor='none', alpha=0.3)
                     self.cur_valid.append(valid_rec)
@@ -152,7 +176,12 @@ class MainWindow(QWidget):
                 self.cur_peak[0].append(peak[-1])
                 self.cur_peak[1] = [self.cur_sig[i] for i in self.cur_peak[0]]
 
+            p1 = self.cur_data["Template"][self.cur_index]["Pos"][0]
+            p2 = self.cur_data["Template"][self.cur_index]["Pos"][1]
+            self.cur_rect.set_x(p1)
+            self.cur_rect.set_width(p2-p1)
             self.plot1_handle()
+            self.plot1.ax.add_patch(self.cur_rect)
             self.plot2_handle(self.cur_data["Template"][0]["Temp"])
 
         except Exception as e:
@@ -165,25 +194,65 @@ class MainWindow(QWidget):
     def back_action(self):
         if self.cur_index > 0:
             self.cur_index -= 1
-            self.cur_rect.set_x(self.cur_data["Template"][self.cur_index]["Pos"][0])    
+            p1 = self.cur_data["Template"][self.cur_index]["Pos"][0]
+            p2 = self.cur_data["Template"][self.cur_index]["Pos"][1]
+            self.cur_rect.set_x(p1)
+            self.cur_rect.set_width(p2-p1)
             self.plot2_handle(self.cur_data["Template"][self.cur_index]["Temp"])
             self.plot1.draw()
 
     def next_action(self):
         if self.cur_index < len(self.cur_data["Template"]) - 1:
             self.cur_index += 1
-            self.cur_rect.set_x(self.cur_data["Template"][self.cur_index]["Pos"][0])    
+            p1 = self.cur_data["Template"][self.cur_index]["Pos"][0]
+            p2 = self.cur_data["Template"][self.cur_index]["Pos"][1]
+            self.cur_rect.set_x(p1)
+            self.cur_rect.set_width(p2-p1)
             self.plot2_handle(self.cur_data["Template"][self.cur_index]["Temp"])
             self.plot1.draw()
 
-    def verified_action(self):
-        print("Verified button clicked")
+    def error_action(self):
+        self.cur_valid[self.cur_index].set_facecolor("red")
+        self.cur_data["Template"][self.cur_index]["Valid"] = 0
+
+
+    def undefined_action(self):
+        self.cur_valid[self.cur_index].set_facecolor("gray")
+        self.cur_data["Template"][self.cur_index]["Valid"] = -1
+
+    def valid_action(self):
+        self.cur_valid[self.cur_index].set_facecolor("none")
+        self.cur_data["Template"][self.cur_index]["Valid"] = 1
+
+    def save_action(self):
+        def clean_numpy(obj):
+            if isinstance(obj, dict):
+                return {k: clean_numpy(v) for k, v in obj.items()}
+
+            elif isinstance(obj, list):
+                return [clean_numpy(v) for v in obj]
+
+            elif isinstance(obj, np.ndarray):
+                return obj.tolist()
+
+            elif isinstance(obj, np.integer):
+                return int(obj)
+
+            elif isinstance(obj, np.floating):
+                return float(obj)
+
+            else:
+                return obj
+        
+        self.cur_data = clean_numpy(self.cur_data)
+        with open(self.cur_file, "w") as f:
+            json.dump(self.cur_data, f, indent=4)
 
     # ======================
     # Plot functions
     # ======================
     def plot1_handle(self):
-        x = np.linspace(0, len(self.cur_sig))
+        self.plot1.ax.set_xlim(0,len(self.cur_sig))
         self.plot1.ax.plot(np.array(self.cur_sig))
         self.plot1.ax.plot(self.cur_peak[0], self.cur_peak[1], 
              marker='o', 
@@ -198,18 +267,38 @@ class MainWindow(QWidget):
         self.plot2.ax.clear()
         self.plot2.ax.plot(np.array(temp))
         self.plot2.draw()   
-
+        
     # ======================
     # Plot functions
     # ======================
+    def keyPressEvent(self, event):
 
-    
+        if event.key() == Qt.Key.Key_Right:
+            self.next_action()
+
+        elif event.key() == Qt.Key.Key_Left:
+            self.back_action()
+
+        elif event.key() == Qt.Key.Key_S:
+            self.save_action()      # you create this
+
+        elif event.key() == Qt.Key.Key_Q:
+            self.error_action()
+        
+        elif event.key() == Qt.Key.Key_W:
+            self.undefined_action()
+
+        elif event.key() == Qt.Key.Key_E:
+            self.valid_action()
+
+        else:
+            super().keyPressEvent(event)
 
 # ======================
 # Run
 # ======================
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = MainWindow("D:/my_project/valid_data")
+    window = MainWindow("D:/ppg_project/Data/valid_data_8_2_26")
     window.show()
     sys.exit(app.exec())

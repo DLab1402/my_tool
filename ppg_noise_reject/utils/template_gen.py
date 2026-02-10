@@ -1,5 +1,6 @@
 import numpy as np
 import neurokit2 as nk
+from scipy.interpolate import CubicSpline
 from scipy.signal import cheby2, filtfilt
 
 class temp_find:
@@ -15,6 +16,7 @@ class temp_find:
         tem = (tem-np.min(tem))/(np.max(tem)-np.min(tem))
         ppg_peaks = self.ppg_peak(tem)
         no_dc = self.dc_take(self.ppg)
+        self.no_base = self.spline(ppg_peaks, no_dc)
         for i in range(len(ppg_peaks)-1):
             temp.append(no_dc[ppg_peaks[int(i)]:ppg_peaks[int(i+1)]])
         return ppg_peaks,temp
@@ -41,7 +43,14 @@ class temp_find:
 
         return filtfilt(b, a, raw_signal)
     
+    def spline(self,peak,ppg):
+        peak_val = [ppg[i] for i in peak]
+        # create spline
+        cs = CubicSpline(peak, peak_val)
+
+        # smooth x values
+        x_full = np.arange(len(ppg))
+        return x_full
 #Test
 if __name__ == "__main__":
     a = temp_find()
-    

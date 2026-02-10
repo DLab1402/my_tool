@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Button
 
 from template_gen import temp_find
-from ppg_noise_reject.utils.label_template import viewer
 
 class data_set_make:
     def __init__(self, link = None):
@@ -29,6 +28,9 @@ class data_set_make:
                 cols = visualize[1]
                 y_peaks = [temper.ppg[i] for i in peaks]
                 plt.plot(temper.ppg)
+                plt.plot(peaks, y_peaks, "o")
+                plt.show()
+                plt.plot(temper.no_base)
                 plt.plot(peaks, y_peaks, "o")
                 plt.show()
                 fig, axes = plt.subplots(rows, cols, figsize=(visualize[2],visualize[3]))
