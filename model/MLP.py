@@ -25,13 +25,13 @@ class MLP(nn.Module):
                     self.layers.append(nn.Tanh())
                 elif self.para["Activate fuction"] == "Sigmoid":
                     self.layers.append(nn.Sigmoid())
-        if self.para["Activate function"] == "ReLU":
+        if self.para["Activate last"] == "ReLU":
             self.layers.append(nn.ReLU())
-        elif self.para["Activate function"] == "LeakyReLU":
+        elif self.para["Activate last"] == "LeakyReLU":
             self.layers.append(nn.LeakyReLU(0.2))
-        elif self.para["Activate function"] == "Tanh":
+        elif self.para["Activate last"] == "Tanh":
             self.layers.append(nn.Tanh())
-        elif self.para["Activate fuction"] == "Sigmoid":
+        elif self.para["Activate last"] == "Sigmoid":
             self.layers.append(nn.Sigmoid())
 
     def forward(self, noise):
