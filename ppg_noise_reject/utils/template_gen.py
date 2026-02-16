@@ -6,6 +6,7 @@ from scipy.signal import resample, savgol_filter
 
 class temp_find:
     ppg_fre = 60
+    num = 100
 
     def __init__(self,ppg = None):
         self.ppg = ppg
@@ -18,7 +19,7 @@ class temp_find:
         ppg_peaks = self.ppg_peak(tem)
         no_base = no_dc-self.spline(ppg_peaks, no_dc)
         for i in range(len(ppg_peaks)-1):
-            a = self.liesample(no_base[ppg_peaks[int(i)]:ppg_peaks[int(i+1)]],100) 
+            a = self.liesample(no_base[ppg_peaks[int(i)]:ppg_peaks[int(i+1)]],self.num) 
             temp.append(a)
         return ppg_peaks,temp
 
