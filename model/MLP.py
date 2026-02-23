@@ -5,7 +5,7 @@ class MLP(nn.Module):
     para = {
             "dim":               [],
             "Activate function": [],
-            "Activate last":     []
+            "Activate last":     None
         }
     def __init__(self,para):
         super(MLP, self).__init__()
@@ -33,7 +33,8 @@ class MLP(nn.Module):
             self.layers.append(nn.Tanh())
         elif self.para["Activate last"] == "Sigmoid":
             self.layers.append(nn.Sigmoid())
-
+        elif self.para["Activate last"] is not None:
+            pass
     def forward(self, noise):
         self.vis.clear()
         out = noise
