@@ -17,24 +17,10 @@ class MLP(nn.Module):
         for dim in self.para["dim"]:
             self.layers.append(nn.Linear(dim[0],dim[1]))
             if dim != self.para["dim"][-1]:
-                if self.para["Activate function"] == "ReLU":
-                    self.layers.append(nn.ReLU())
-                elif self.para["Activate function"] == "LeakyReLU":
-                    self.layers.append(nn.LeakyReLU(0.2))
-                elif self.para["Activate function"] == "Tanh":
-                    self.layers.append(nn.Tanh())
-                elif self.para["Activate function"] == "Sigmoid":
-                    self.layers.append(nn.Sigmoid())
-        if self.para["Activate last"] == "ReLU":
-            self.layers.append(nn.ReLU())
-        elif self.para["Activate last"] == "LeakyReLU":
-            self.layers.append(nn.LeakyReLU(0.2))
-        elif self.para["Activate last"] == "Tanh":
-            self.layers.append(nn.Tanh())
-        elif self.para["Activate last"] == "Sigmoid":
-            self.layers.append(nn.Sigmoid())
-        elif self.para["Activate last"] is not None:
-            pass
+                self.layers.append(self.para["Activate function"])
+        if self.para["Activate last"] != None:
+            self.layers.append(self.para["Activate last"])
+            
     def forward(self, noise):
         self.vis.clear()
         out = noise
