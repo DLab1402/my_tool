@@ -5,6 +5,7 @@ import torch.nn.functional as F
 class Conv1DNet(nn.Module):
     vis = []
     para = [{
+        "type": "conv",
         "channels": [64,64],
         "stride": 2,
         "padding": 0,
@@ -24,10 +25,16 @@ class Conv1DNet(nn.Module):
 
     def structure_calculate(self):
         for ch in self.para:
-            layer  = nn.Sequential(
-                nn.Conv1d(ch["channels"][0], ch["channels"][1], kernel_size=ch["kernel"], stride=ch["stride"], padding=ch["padding"]),
-                ch["activate function"]
-            )
+            if ch["type"] == "conv":
+                layer  = nn.Sequential(
+                    nn.Conv1d(ch["channels"][0], ch["channels"][1], kernel_size=ch["kernel"], stride=ch["stride"], padding=ch["padding"]),
+                    ch["activate function"]
+                )
+            elif ch["type"] == "deconv":
+                layer  = nn.Sequential(
+                    nn.ConvTranspose1d(ch["channels"][0], ch["channels"][1], kernel_size=ch["kernel"], stride=ch["stride"], padding=ch["padding"]),
+                    ch["activate function"]
+                )
             if ch["BatchNorm"]:
                 layer.add_module("BatchNorm", nn.BatchNorm1d(ch["channels"][1]))
             self.layers.append(layer)
