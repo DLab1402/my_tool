@@ -23,10 +23,11 @@ class MLP(nn.Module):
         for i, dim in enumerate(dims):
             in_dim, out_dim = dim
             self.layers.append(nn.Linear(in_dim, out_dim))
-            if use_bn:
-                self.layers.append(nn.BatchNorm1d(out_dim))
+            
             if i != len(dims) - 1 and act_fn is not None:
                 self.layers.append(type(act_fn)())
+            if use_bn:
+                self.layers.append(nn.BatchNorm1d(out_dim))
 
         if act_last is not None:
             self.layers.append(act_last)
