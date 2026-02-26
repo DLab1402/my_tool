@@ -21,17 +21,18 @@ class CNN1D(nn.Module):
             layers = []
 
             if types[i] == "conv":
-                layers.append(nn.Conv1d(dim[i][0],dim[i][1],ker[i][0],ker[i][1],ker[i][2]))
+                layers.append(nn.Conv1d(dim[i][0],dim[i][1],kernel_size=ker[i][0],stride=ker[i][1],padding=ker[i][2]))
 
             elif types[i] == "deconv":
-                layers.append(nn.ConvTranspose1d(dim[i][0],dim[i][1],ker[i][0],ker[i][1],ker[i][2],))
+                layers.append(nn.ConvTranspose1d(dim[i][0],dim[i][1],kernel_size=ker[i][0],stride=ker[i][1],padding=ker[i][2],))
 
             if BN[i]:
                 layers.append(nn.BatchNorm1d(dim[i][1]))
 
             layers.append(act[i])
             # ----- Pool -----
-            layers.append(pool[i](kernel_size=pker[i][0],stride=pker[i][1],padding=pker[i][2]))
+            if pool[i] is not None:
+                layers.append(pool[i](kernel_size=pker[i][0],stride=pker[i][1],padding=pker[i][2]))
 
             self.blocks.append(nn.Sequential(*layers))
 
@@ -46,11 +47,11 @@ if __name__ == "__main__":
 
     # -------- Network parameters --------
     para = {
-        "type": ["conv", "conv", "conv"],
+        "type": ["deconv", "deconv", "deconv"],
         "dim": [(1, 16),(16, 32),(32, 64)],
-        "kernel": [(3, 1, 1),(3, 1, 1),(3, 1, 1)],
-        "pkernel": [(2, 2, 0),(2, 2, 0),(2, 2, 0)],
-        "pooling": [nn.MaxPool1d,nn.MaxPool1d,nn.MaxPool1d],
+        "kernel": [(3, 2, 1),(3, 2, 1),(3, 2, 1)],
+        "pkernel": [(2, 1, 0),(2, 1, 0),(2, 1, 0)],
+        "pooling": [None,None,None],
         "actfn": [nn.ReLU(),nn.LeakyReLU(0.1),nn.ReLU()],
         "BN": [True, False, True],
     }
