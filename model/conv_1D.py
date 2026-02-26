@@ -1,69 +1,92 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
-class Conv1DNet(nn.Module):
-    vis = []
-    para = [{
-        "type": "conv",
-        "channels": [64,64],
-        "stride": 2,
-        "padding": 0,
-        "kernel": 3,
-        "activate function": nn.ReLU(),
-        "pool name":F.max_pool1d,
-        "pool kernel": 2,
-        "pool stride": 2,
-        "pool padding": 0,
-        "BatchNorm": False,
-    }]
+class CNN1D(nn.Module):
     def __init__(self, para):
         super().__init__()
-        self.para = para
-        self.layers = nn.ModuleList()
-        self.structure_calculate()
+        self.blocks = nn.ModuleList()
+        self.vis = []
+        self.build(para)
 
-    def structure_calculate(self):
-        for ch in self.para:
-            if ch["type"] == "conv":
-                layer  = nn.Sequential(
-                    nn.Conv1d(ch["channels"][0], ch["channels"][1], kernel_size=ch["kernel"], stride=ch["stride"], padding=ch["padding"]),
-                    ch["activate function"]
-                )
-            elif ch["type"] == "deconv":
-                layer  = nn.Sequential(
-                    nn.ConvTranspose1d(ch["channels"][0], ch["channels"][1], kernel_size=ch["kernel"], stride=ch["stride"], padding=ch["padding"]),
-                    ch["activate function"]
-                )
-            if ch["BatchNorm"]:
-                layer.add_module("BatchNorm", nn.BatchNorm1d(ch["channels"][1]))
-            self.layers.append(layer)
+    def build(self, para):
+        types = para["type"]
+        dim = para["dim"]
+        ker = para["kernel"]
+        pker = para["pkernel"]
+        pool = para["pooling"]
+        act = para["actfn"]
+        BN = para["BN"]
+
+        for i in range(len(types)):
+            layers = []
+
+            if types[i] == "conv":
+                layers.append(nn.Conv1d(dim[i][0],dim[i][1],ker[i][0],ker[i][1],ker[i][2]))
+
+            elif types[i] == "deconv":
+                layers.append(nn.ConvTranspose1d(dim[i][0],dim[i][1],ker[i][0],ker[i][1],ker[i][2],))
+
+            if BN[i]:
+                layers.append(nn.BatchNorm1d(dim[i][1]))
+
+            layers.append(act[i])
+            # ----- Pool -----
+            layers.append(pool[i](kernel_size=pker[i][0],stride=pker[i][1],padding=pker[i][2]))
+
+            self.blocks.append(nn.Sequential(*layers))
 
     def forward(self, x):
         self.vis.clear()
-        for i,layer in enumerate(self.layers):
-            x = layer(x)
-            if self.para[i]["pool name"] is not None:
-                x = self.para[i]["pool name"](x, kernel_size=self.para[i]["pool kernel"], stride=self.para[i]["pool stride"], padding=self.para[i]["pool padding"])
+        for block in self.blocks:
+            x = block(x)
             self.vis.append(x)
-
         return x
 
-
 if __name__ == "__main__":
-    para = [{
-        "channels": [1, 64],
-        "stride": 1,
-        "padding": 1,
-        "kernel": 3,
-        "activate function": nn.ReLU(),
-        "pool name": F.max_pool1d,
-        "pool kernel": 2,
-        "pool stride": 2,
-        "pool padding": 0,
-        "BatchNorm": True
-    }]
-    model = Conv1DNet(para)
-    input_data = torch.randn(16, 1, 128)  # Batch size of 16, 1 channel, sequence length of 128
-    output = model(input_data)
-    print(output.shape)
+
+    # -------- Network parameters --------
+    para = {
+        "type": ["conv", "conv", "conv"],
+        "dim": [(1, 16),(16, 32),(32, 64)],
+        "kernel": [(3, 1, 1),(3, 1, 1),(3, 1, 1)],
+        "pkernel": [(2, 2, 0),(2, 2, 0),(2, 2, 0)],
+        "pooling": [nn.MaxPool1d,nn.MaxPool1d,nn.MaxPool1d],
+        "actfn": [nn.ReLU(),nn.LeakyReLU(0.1),nn.ReLU()],
+        "BN": [True, False, True],
+    }
+
+    # -------- Create model --------
+    model = CNN1D(para)
+
+    print("\nMODEL STRUCTURE\n")
+    print(model)
+
+
+    # -------- Dummy input --------
+    # (batch, channel, length)
+    x = torch.randn(8, 1, 100)
+
+    print("\nInput shape:", x.shape)
+
+
+    # -------- Forward --------
+    y = model(x)
+
+    print("\nFinal output shape:", y.shape)
+
+
+    # -------- Intermediate outputs --------
+    print("\nLayer-wise outputs:")
+    for i, v in enumerate(model.vis):
+        print(f"Layer {i}: {v.shape}")
+
+
+    # -------- Backprop test --------
+    print("\nGradient check...")
+
+    loss = y.mean()
+    loss.backward()
+
+    for name, param in model.named_parameters():
+        if param.grad is not None:
+            print(f"{name}: OK")

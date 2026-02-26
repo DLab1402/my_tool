@@ -23,7 +23,6 @@ class MLP(nn.Module):
         for i, dim in enumerate(dims):
             in_dim, out_dim = dim
             self.layers.append(nn.Linear(in_dim, out_dim))
-            
             if i != len(dims) - 1 and act_fn is not None:
                 self.layers.append(type(act_fn)())
             if use_bn:
@@ -38,3 +37,12 @@ class MLP(nn.Module):
             x = layer(x)
             self.vis.append(x)
         return x
+
+if __name__ == "__main__":
+    para = {
+        "dim": [(10, 20), (20, 30)],
+        "Activate function": nn.ReLU(),
+        "BatchNorm": True
+    }
+    model = MLP(para)
+    print(model)
