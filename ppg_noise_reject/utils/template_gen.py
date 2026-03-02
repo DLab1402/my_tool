@@ -102,11 +102,8 @@ class temp_find:
         return cs(x_full)
     
     def liesample(self,signal, num_points):
-        if len(signal) <= num_points:
-            y_smooth = savgol_filter(signal, window_length=11, polyorder=3)
-            resam = resample(y_smooth, num_points)
-        else:
-            resam = signal
+        y_smooth = savgol_filter(signal, window_length=11, polyorder=3)
+        resam = resample(y_smooth, num_points)
         a = (resam[-1]-resam[0])/(len(resam)-1)
         b = resam[0]
         c = a*np.arange(len(resam))+b
