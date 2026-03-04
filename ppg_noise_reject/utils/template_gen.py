@@ -11,6 +11,7 @@ class temp_find:
     def __init__(self,ppg = None):
         self.ppg = ppg
         
+
     def temping(self):
         temp = []
         no_dc = self.dc_take(self.ppg)
@@ -78,4 +79,4 @@ if __name__ == "__main__":
     plt.plot(spline)
     plt.show()
     plt.plot(no_dc-spline)
-    plt.show()
+    plt.show();
