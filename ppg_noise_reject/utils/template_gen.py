@@ -103,13 +103,13 @@ class temp_find:
         return cs(x_full)
     
     def liesample(self,signal, num_points):
-        y_smooth = savgol_filter(signal, window_length=11, polyorder=3)
+        a = (signal[-1]-signal[0])/(len(signal)-1)
+        b = signal[0]
+        c = a*np.arange(len(signal))+b
+        y = signal - c
+        y_smooth = savgol_filter(y, window_length=11, polyorder=3)
         resam = resample(y_smooth, num_points)
-        a = (resam[-1]-resam[0])/(len(resam)-1)
-        b = resam[0]
-        c = a*np.arange(len(resam))+b
-
-        return resam-c 
+        return resam
 #Test
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
