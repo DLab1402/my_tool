@@ -102,7 +102,7 @@ class temp_find:
     
     def liesample(self,signal, num_points):
         a = (signal[-1]-signal[0])/(len(signal)-1)
-        b = signal[0]
+        b = signal[-1]
         c = a*np.arange(len(signal))+b
         y = signal - c
         y_smooth = savgol_filter(y, window_length=11, polyorder=3)
@@ -120,6 +120,7 @@ if __name__ == "__main__":
 
     n = len(files)
     idx = random.randint(0, n - 1)
+    idx = 127
     file_path = os.path.join(path, files[idx])
 
     a = temp_find()
@@ -131,30 +132,62 @@ if __name__ == "__main__":
     no_dc = a.dc_take(a.ppg)
     peaks,feet,temp = a.temping()
     foot = random.randint(0, len(feet) - 1)
+    foot = 12+48
+    print("foot:", foot)
+    print("idx:", idx)
     f1 = feet[foot]
     f2 = feet[foot+1]
     spline = a.spline(feet, no_dc)
+
     fig, ax = plt.subplots(3, 1, figsize=(10, 6))
-    ax[0].plot(a.ppg, "b", label="Raw Signal")
+    ax[0].plot(a.ppg)
     ax[0].set_xlim(500, 8000)
-    ax[1].plot(no_dc, "b", label="DC")
-    ax[1].plot(peaks, no_dc[peaks], "ro", label="Peaks")
-    ax[1].plot(feet, no_dc[feet], "ko", label="Feet")
-    ax[1].plot(spline, "m", label="Spline")
+    ax[0].grid()
+    ax[0].set_title("(A)")
+
+    ax[1].plot(no_dc)
+    ax[1].plot(peaks, no_dc[peaks], "ro")
+    ax[1].plot(feet, no_dc[feet], "ko")
+    ax[1].plot(spline)
     ax[1].set_xlim(500, 8000)
     ax[1].set_ylim(-100, 100)
+    ax[1].grid()
+    ax[1].set_title("(B)")
 
     final = no_dc - spline
     ax[2].plot(final)
-    ax[2].set_title("Detrended Signal")
     ax[2].set_xlim(500, 8000)
-    ax[2].set_ylim(-100, 100)
-    valid_rec = Rectangle((f1, -100), f2-f1, 200, facecolor='red', edgecolor='none', alpha=0.3)
+    ax[2].set_ylim(-25, 110)
+    ax[2].grid()
+    ax[2].set_title("(C)")
+    valid_rec = Rectangle((f1, -100), f2-f1, 225, facecolor='red', edgecolor='none', alpha=0.3)
     ax[2].add_patch(valid_rec)
-    plt.draw()
+    # plt.draw()
+    plt.show()
 
-    tp = final[f1:f2]
+    tp = no_dc[f1:f2]
     plt.plot(tp)
+    plt.grid()
     plt.show()
-    plt.plot(no_dc-spline)
+
+    tp1 = a.liesample(final[f1:f2], a.num)
+    tp1 = (tp1-np.min(tp1))/(np.max(tp1)-np.min(tp1))
+    plt.plot(tp1)
+    plt.grid()
     plt.show()
+
+
+    tp2 = no_dc[f1:f2]
+    tp2 = a.liesample(tp2, a.num)
+    a = (tp2-tp2[0])/(len(tp2)-1)
+    b = tp2[-1]
+    c = a*np.arange(len(tp2))+b
+    tp2 = tp2 - c
+    tp2 = (tp2-np.min(tp2))/(np.max(tp2)-np.min(tp2))
+    plt.plot(tp2)
+    plt.grid()
+    plt.show()
+
+
+
+    # 182 113, 42 82, 151 93, 144 135, 9 90, 105 86, 139 9, 109 40
