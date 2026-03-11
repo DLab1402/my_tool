@@ -40,7 +40,6 @@ class temp_find:
 
         _, results = nk.ppg_peaks(s, sampling_rate=fs)
         peak_idx = results["PPG_Peaks"]
-        peak_val = s[peak_idx]
 
         valley_idx = []
         valley_val = []
@@ -68,9 +67,8 @@ class temp_find:
         for i in range(len(valley_idx)-1):
             a = self.liesample(no_base[valley_idx[int(i)]:valley_idx[int(i+1)]],self.num) 
             temp.append(a)
-        return valley_idx,temp
+        return peak_idx,valley_idx,temp
         
-        return valley_idx,valley_val
 
     def ppg_peak(self,ppg):
         _, results = nk.ppg_peaks(ppg, sampling_rate = self.ppg_fre)
@@ -111,17 +109,54 @@ class temp_find:
         return resam-c 
 #Test
 if __name__ == "__main__":
-    import matplotlib.pyplot as plt
+    import pylab as plt
+    import os
+    import random
     import json
-    with open("D:/my_project/my_tool/ppg_noise_reject/utils/test.json", "r", encoding="utf-8") as f:
-        data = json.load(f)
+    from matplotlib.patches import Rectangle
+    path = "D:/my_project/valid_data_8_2_26_resample"
+    files = [f for f in os.listdir(path) if f.endswith(".json")]
+
+    n = len(files)
+    idx = random.randint(0, n - 1)
+    file_path = os.path.join(path, files[idx])
+
     a = temp_find()
+
+    with open(file_path, "r") as f:
+        data = json.load(f)
+    
     a.ppg = data["PPG"]
     no_dc = a.dc_take(a.ppg)
-    peaks,temp = a.temping()
-    spline = a.spline(peaks, no_dc)
-    plt.plot(no_dc)
-    plt.plot(spline)
+    peaks,feet,temp = a.temping()
+    foot = random.randint(0, len(feet) - 1)
+    f1 = feet[foot]
+    f2 = feet[foot+1]
+    spline = a.spline(feet, no_dc)
+    fig, ax = plt.subplots(3, 1, figsize=(10, 6))
+    ax[0].plot(a.ppg, "b", label="Raw Signal")
+    ax[0].set_xlim(500, 8000)
+    ax[1].plot(no_dc, "b", label="DC")
+    ax[1].plot(peaks, no_dc[peaks], "ro", label="Peaks")
+    ax[1].plot(feet, no_dc[feet], "ko", label="Feet")
+    ax[1].plot(spline, "m", label="Spline")
+    ax[1].set_xlim(500, 8000)
+    ax[1].set_ylim(-100, 100)
+
+    final = no_dc - spline
+    ax[2].plot(final)
+    ax[2].set_title("Detrended Signal")
+    ax[2].set_xlim(500, 8000)
+    ax[2].set_ylim(-100, 100)
+    valid_rec = Rectangle((f1, -100), f2-f1, 200, facecolor='red', edgecolor='none', alpha=0.3)
+    ax[2].add_patch(valid_rec)
+    plt.draw()
+
+    tp = final[f1:f2]
+    plt.plot(tp)
     plt.show()
-    plt.plot(no_dc-spline)
+
+    tp = a.liesample(tp, 128)
+    tp = (tp - np.min(tp)) / (np.max(tp) - np.min(tp))
+    plt.plot(tp)
     plt.show()

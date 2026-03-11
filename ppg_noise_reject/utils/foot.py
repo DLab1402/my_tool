@@ -148,9 +148,9 @@ def main(s):
     fig, ax = plt.subplots(3, 1, figsize=(10, 6))
 
     ax[0].plot(t, s, "g", label="Raw Signal")
-    ax[0].plot(t[peak_idx], peak_val, "bo", label="Detected Peaks")
+    ax[0].plot(t[peak_idx], peak_val, "bo", label="Peak")
     ax[0].plot(valley_idx, valley_val, "ko", label="Detected Feet")
-    ax[0].plot(final_idx, final_value, "ro", label="Accepted Feet")
+    # ax[0].plot(final_idx, final_value, "ro", label="Accepted Feet")
     ax[0].set_title("PPG Signal")
     ax[0].set_xlabel("Time (s)")
     ax[0].legend()
