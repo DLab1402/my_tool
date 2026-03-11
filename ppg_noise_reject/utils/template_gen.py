@@ -11,6 +11,7 @@ class temp_find:
     def __init__(self,ppg = None):
         self.ppg = ppg
         
+
     def temping(self):
         # temp = []
         # no_dc = self.dc_take(self.ppg)
@@ -100,13 +101,13 @@ class temp_find:
         return cs(x_full)
     
     def liesample(self,signal, num_points):
-        y_smooth = savgol_filter(signal, window_length=11, polyorder=3)
+        a = (signal[-1]-signal[0])/(len(signal)-1)
+        b = signal[0]
+        c = a*np.arange(len(signal))+b
+        y = signal - c
+        y_smooth = savgol_filter(y, window_length=11, polyorder=3)
         resam = resample(y_smooth, num_points)
-        a = (resam[-1]-resam[0])/(len(resam)-1)
-        b = resam[0]
-        c = a*np.arange(len(resam))+b
-
-        return resam-c 
+        return resam
 #Test
 if __name__ == "__main__":
     import pylab as plt
@@ -155,8 +156,5 @@ if __name__ == "__main__":
     tp = final[f1:f2]
     plt.plot(tp)
     plt.show()
-
-    tp = a.liesample(tp, 128)
-    tp = (tp - np.min(tp)) / (np.max(tp) - np.min(tp))
-    plt.plot(tp)
+    plt.plot(no_dc-spline)
     plt.show()
