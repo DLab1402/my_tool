@@ -91,7 +91,7 @@ def latent_sketch(latents,losses,disease):
 
     print("Explained variance ratio:", pca.explained_variance_ratio_)
     print("Total explained variance (2D):", np.sum(pca.explained_variance_ratio_))
-    sketch = np.transpose(latents)
+    sketch = np.transpose(latent_nd)
 
     #Latent comparison
     fig, axes = plt.subplots(1,2,figsize=(12,4))
