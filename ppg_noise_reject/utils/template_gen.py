@@ -3,6 +3,7 @@ import neurokit2 as nk
 from scipy.interpolate import CubicSpline
 from scipy.signal import cheby2, filtfilt,butter
 from scipy.signal import resample, savgol_filter
+from sklearn.ensemble import IsolationForest
 
 class temp_find:
     ppg_fre = 60
@@ -11,36 +12,71 @@ class temp_find:
     def __init__(self,ppg = None):
         self.ppg = ppg
         
-
     def temping(self):
-        # temp = []
-        # no_dc = self.dc_take(self.ppg)
-        # tem = (-1 * np.array(no_dc))
-        # tem = (tem-np.min(tem))/(np.max(tem)-np.min(tem))
-        # ppg_peaks = self.ppg_peak(tem)
-        # no_base = no_dc-self.spline(ppg_peaks, no_dc)
-        # for i in range(len(ppg_peaks)-1):
-        #     a = self.liesample(no_base[ppg_peaks[int(i)]:ppg_peaks[int(i+1)]],self.num) 
-        #     temp.append(a)
-        # return ppg_peaks,temp
         fs = self.ppg_fre  # Sampling rate
         N = len(self.ppg)
         t = np.arange(N) / fs
         s = np.array(self.ppg)
 
-        # --------------------------------
-    
-        # --------------------------------
         lowcut = 0.5
         highcut = 3
         order = 4
 
         b, a = butter(order, [lowcut/(fs/2), highcut/(fs/2)], btype='band')
         filtered = filtfilt(b, a, s)
-        s1 = filtered
 
-        _, results = nk.ppg_peaks(s, sampling_rate=fs)
+        _, results = nk.ppg_peaks(filtered, sampling_rate=fs)
         peak_idx = results["PPG_Peaks"]
+
+        peak_idx = np.array(peak_idx)
+        peak_val = [filtered[i] for i in peak_idx]
+
+        peak_val = np.array(peak_val)
+
+
+        interval = np.diff(peak_idx)
+        # plt.plot(interval)
+        # plt.show()
+        valid = peak_idx.copy()  # copy to mark valid peaks
+
+        for i in range(len(peak_idx)-1):
+            start = peak_idx[i]
+            end = peak_idx[i + 1]
+
+            # segment between two peaks
+            segment = filtered[start:end]
+
+            
+            # find local minimum in that segment
+            local_min_index = np.argmin(segment)
+            h1 = peak_val[i] - segment[local_min_index]
+            h2 = peak_val[i+1] - segment[local_min_index]
+            
+            if interval[i] < np.min(interval):  # less than 0.5 seconds                    
+                if peak_val[i] > peak_val[i+1]:
+                    valid[i+1] = -1  # mark for removal
+            
+            else:
+                if h2/h1 < 0.6:  # if the next peak is not significantly higher than the current one
+                    valid[i+1] = -1  # mark for removal
+                # else:
+                #     valid[i] = -1  # mark for removal
+            
+
+        # Remove marked peaks        peak_idx = peak_idx[peak_idx != -1]
+        peak_val = [filtered[i] for i in valid if i != -1]
+        # print("peak_val:", peak_val)
+        peak_idx = np.array([i for i in valid if i != -1])
+        # X = peak_val.reshape(-1, 1)
+
+        # clf = IsolationForest(contamination=0.05)  # tune this
+        # labels = clf.fit_predict(X)
+
+        # # keep normal points (label = 1)
+        # mask = np.where(labels == 1)
+
+        # peak_val = peak_val[mask]
+        # peak_idx = peak_idx[mask]  # keep index aligned
 
         valley_idx = []
         valley_val = []
@@ -59,15 +95,57 @@ class temp_find:
             global_min_index = start + local_min_index
 
             valley_idx.append(global_min_index)
-            valley_val.append(s[global_min_index])
+            valley_val.append(filtered[global_min_index])
 
         valley_idx = np.array(valley_idx)
+        valley_val = np.array(valley_val)
+
+        # # Compute gradient around each valley
+        # grad_left = []
+        # grad_right = []
+
+        # for i, idx in enumerate(valley_idx[1:-1]):
+        #     x1 = valley_idx[i-1]  # previous valley
+        #     x2 = valley_idx[i + 1]  # next valley
+        #     y1 = valley_val[i-1]  # previous valley value
+        #     y2 = valley_val[i + 1]  # next valley value
+        #     g_left = (valley_val[i] - y1) / (idx - x1)
+        #     g_right = (y2 - valley_val[i]) / (x2 - idx)
+
+        #     grad_left.append(g_left)
+        #     grad_right.append(g_right)
+
+        # grad_left = np.array(grad_left)
+        # grad_right = np.array(grad_right)
+
+        # # print("grad_left:", grad_left)
+        # # print("grad_right:", grad_right)
+
+        # threshold = 0.00001  # tune this based on your signal scale
+
+        # valid_indices = []
+
+        # for i in range(len(valley_idx[1:-1])):
+        #     g_left = grad_left[i]
+        #     g_right = grad_right[i]
+
+        #     # Reject abnormal valleys
+        #     if (g_left > threshold) and (g_right > -threshold):
+        #         continue  # skip this one (eject)
+
+        #     valid_indices.append(i)
+        
+        # valley_idx = valley_idx[valid_indices]
+
+
         temp = []
         no_dc = self.dc_take(s)
         no_base = no_dc-self.spline(valley_idx, no_dc)
         for i in range(len(valley_idx)-1):
             a = self.liesample(no_base[valley_idx[int(i)]:valley_idx[int(i+1)]],self.num) 
             temp.append(a)
+
+        
         return peak_idx,valley_idx,temp
         
 
@@ -120,7 +198,7 @@ if __name__ == "__main__":
 
     n = len(files)
     idx = random.randint(0, n - 1)
-    idx = 127
+    # idx = 127
     file_path = os.path.join(path, files[idx])
 
     a = temp_find()
@@ -165,27 +243,27 @@ if __name__ == "__main__":
     # plt.draw()
     plt.show()
 
-    tp = no_dc[f1:f2]
-    plt.plot(tp)
-    plt.grid()
-    plt.show()
+    # tp = no_dc[f1:f2]
+    # plt.plot(tp)
+    # plt.grid()
+    # plt.show()
 
-    tp1 = a.liesample(final[f1:f2], a.num)
-    tp1 = (tp1-np.min(tp1))/(np.max(tp1)-np.min(tp1))
-    plt.plot(tp1)
-    plt.grid()
-    plt.show()
+    # tp1 = a.liesample(final[f1:f2], a.num)
+    # tp1 = (tp1-np.min(tp1))/(np.max(tp1)-np.min(tp1))
+    # plt.plot(tp1)
+    # plt.grid()
+    # plt.show()
 
 
-    tp2 = no_dc[f1:f2]
-    tp2 = a.liesample(tp2, a.num)
-    a = (tp2-tp2[0])/(len(tp2)-1)
-    b = tp2[-1]
-    c = a*np.arange(len(tp2))+b
-    tp2 = tp2 - c
-    tp2 = (tp2-np.min(tp2))/(np.max(tp2)-np.min(tp2))
-    plt.plot(tp2)
-    plt.grid()
-    plt.show()
+    # tp2 = no_dc[f1:f2]
+    # tp2 = a.liesample(tp2, a.num)
+    # a = (tp2-tp2[0])/(len(tp2)-1)
+    # b = tp2[-1]
+    # c = a*np.arange(len(tp2))+b
+    # tp2 = tp2 - c
+    # tp2 = (tp2-np.min(tp2))/(np.max(tp2)-np.min(tp2))
+    # plt.plot(tp2)
+    # plt.grid()
+    # plt.show()
 
     # 182 113, 42 82, 151 93, 144 135, 9 90, 105 86, 139 9, 109 40

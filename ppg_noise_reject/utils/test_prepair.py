@@ -164,7 +164,7 @@ class MainWindow(QWidget):
 
             else:
                 templates = []
-                peak,temp = temp_find(self.cur_sig).temping()
+                _,peak,temp = temp_find(self.cur_sig).temping()
                 for i in range(len(temp)):
                     templates.append({"Pos": [peak[i],peak[i+1]], "Valid": 1, "Temp": temp[i]})
                     self.cur_peak[0].append(peak[i])
@@ -300,6 +300,6 @@ class MainWindow(QWidget):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     # window = MainWindow("D:/ppg_project/Data/valid_data_8_2_26")
-    window = MainWindow("H:\\My Drive\\data_set_ppg_reject2\\test")
+    window = MainWindow("H:\\My Drive\\data_set_ppg_reject3\\test")
     window.show()
     sys.exit(app.exec())

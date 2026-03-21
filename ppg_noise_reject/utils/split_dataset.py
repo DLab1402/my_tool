@@ -4,8 +4,8 @@ import shutil
 import random
 
 # ======= CHANGE THESE =======
-src_folder = "D:/my_project/valid_data_8_2_26_resample"
-out_root = "D:/my_project/data_set_ppg_reject2"
+src_folder = "D:/my_project/valid_data_8_2_26_resample2"
+out_root = "D:/my_project/data_set_ppg_reject3"
 
 train_ratio = 0.5
 val_ratio = 0.25
