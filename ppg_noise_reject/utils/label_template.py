@@ -61,6 +61,9 @@ class MainWindow(QWidget):
 
         # -------- Plot 1 (Top Full Width) --------
         self.plot1 = MplCanvas()
+        self.plot1.ax.set_facecolor('black')
+        self.plot1.figure.set_facecolor('#2b2b2b')
+
         self.plot1.ax.set_ylim(-0.2, 1.2)
         main_layout.addWidget(self.plot1, 1)
 
@@ -76,6 +79,8 @@ class MainWindow(QWidget):
 
         # Plot 2
         self.plot2 = MplCanvas()
+        self.plot2.ax.set_facecolor('#2b2b2b')
+        self.plot2.figure.set_facecolor('#2b2b2b')
         self.plot2.ax.set_ylim(-0.2, 1.2)
         # self.plot2.ax.set_xlim(0, 100)
         bottom_row.addWidget(self.plot2, 1)
@@ -299,6 +304,22 @@ class MainWindow(QWidget):
 # ======================
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setStyleSheet("""
+                        QWidget {
+                            background-color: #121212;
+                            color: #ffffff;
+                            font-size: 14px;
+                        }
+                        QPushButton {
+                            background-color: #1f1f1f;
+                            border: 1px solid #333;
+                            padding: 5px;
+                        }
+                        QPushButton:hover {
+                            background-color: #2a2a2a;
+                        }
+                    """)
+
     window = MainWindow("D:/my_project/valid_data_8_2_26_resample2")
     # window = MainWindow("H:\\My Drive\\data_set_ppg_reject2\\train")
     window.show()

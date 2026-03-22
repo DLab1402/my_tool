@@ -139,6 +139,6 @@ def sqi(path, path_test):
     plt.show()
 
 if __name__ == "__main__":
-    path = "H:/My Drive/data_set_ppg_reject2/train"
-    path_test = "H:/My Drive/data_set_ppg_reject2/test"
+    path = "H:/My Drive/data_set_ppg_reject3/train"
+    path_test = "H:/My Drive/data_set_ppg_reject3/test"
     sqi(path, path_test)

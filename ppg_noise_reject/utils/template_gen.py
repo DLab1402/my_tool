@@ -56,8 +56,8 @@ class temp_find:
                 if peak_val[i] > peak_val[i+1]:
                     valid[i+1] = -1  # mark for removal
             
-            else:
-                if h2/h1 < 0.6:  # if the next peak is not significantly higher than the current one
+            if fs > interval[i] and interval[i] >= np.min(interval):  # greater than 2 seconds
+                if h2/h1 < 0.7:  # if the next peak is not significantly higher than the current one
                     valid[i+1] = -1  # mark for removal
                 # else:
                 #     valid[i] = -1  # mark for removal
@@ -193,6 +193,7 @@ if __name__ == "__main__":
     import random
     import json
     from matplotlib.patches import Rectangle
+    plt.style.use('dark_background')
     path = "D:/my_project/valid_data_8_2_26_resample"
     files = [f for f in os.listdir(path) if f.endswith(".json")]
 
