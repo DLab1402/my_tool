@@ -28,55 +28,55 @@ class temp_find:
         _, results = nk.ppg_peaks(filtered, sampling_rate=fs)
         peak_idx = results["PPG_Peaks"]
 
-        peak_idx = np.array(peak_idx)
-        peak_val = [filtered[i] for i in peak_idx]
+        # peak_idx = np.array(peak_idx)
+        # peak_val = [filtered[i] for i in peak_idx]
 
-        peak_val = np.array(peak_val)
+        # peak_val = np.array(peak_val)
 
 
-        interval = np.diff(peak_idx)
-        # plt.plot(interval)
-        # plt.show()
-        valid = peak_idx.copy()  # copy to mark valid peaks
+        # interval = np.diff(peak_idx)
+        # # plt.plot(interval)
+        # # plt.show()
+        # valid = peak_idx.copy()  # copy to mark valid peaks
 
-        for i in range(len(peak_idx)-1):
-            start = peak_idx[i]
-            end = peak_idx[i + 1]
+        # for i in range(len(peak_idx)-1):
+        #     start = peak_idx[i]
+        #     end = peak_idx[i + 1]
 
-            # segment between two peaks
-            segment = filtered[start:end]
+        #     # segment between two peaks
+        #     segment = filtered[start:end]
 
             
-            # find local minimum in that segment
-            local_min_index = np.argmin(segment)
-            h1 = peak_val[i] - segment[local_min_index]
-            h2 = peak_val[i+1] - segment[local_min_index]
+        #     # find local minimum in that segment
+        #     local_min_index = np.argmin(segment)
+        #     h1 = peak_val[i] - segment[local_min_index]
+        #     h2 = peak_val[i+1] - segment[local_min_index]
             
-            if interval[i] < np.min(interval):  # less than 0.5 seconds                    
-                if peak_val[i] > peak_val[i+1]:
-                    valid[i+1] = -1  # mark for removal
+        #     if interval[i] < 0.4*fs:  # less than 0.5 seconds                    
+        #         if peak_val[i] > peak_val[i+1]:
+        #             valid[i+1] = -1  # mark for removal
             
-            if fs > interval[i] and interval[i] >= np.min(interval):  # greater than 2 seconds
-                if h2/h1 < 0.7:  # if the next peak is not significantly higher than the current one
-                    valid[i+1] = -1  # mark for removal
-                # else:
-                #     valid[i] = -1  # mark for removal
+        #     if fs > interval[i] and interval[i] >= 0.4*fs:  # greater than 2 seconds
+        #         if h2/h1 < 0.7:  # if the next peak is not significantly higher than the current one
+        #             valid[i+1] = -1  # mark for removal
+        #         # else:
+        #         #     valid[i] = -1  # mark for removal
             
 
-        # Remove marked peaks        peak_idx = peak_idx[peak_idx != -1]
-        peak_val = [filtered[i] for i in valid if i != -1]
-        # print("peak_val:", peak_val)
-        peak_idx = np.array([i for i in valid if i != -1])
-        # X = peak_val.reshape(-1, 1)
+        # # Remove marked peaks        peak_idx = peak_idx[peak_idx != -1]
+        # peak_val = [filtered[i] for i in valid if i != -1]
+        # # print("peak_val:", peak_val)
+        # peak_idx = np.array([i for i in valid if i != -1])
+        # # X = peak_val.reshape(-1, 1)
 
-        # clf = IsolationForest(contamination=0.05)  # tune this
-        # labels = clf.fit_predict(X)
+        # # clf = IsolationForest(contamination=0.05)  # tune this
+        # # labels = clf.fit_predict(X)
 
-        # # keep normal points (label = 1)
-        # mask = np.where(labels == 1)
+        # # # keep normal points (label = 1)
+        # # mask = np.where(labels == 1)
 
-        # peak_val = peak_val[mask]
-        # peak_idx = peak_idx[mask]  # keep index aligned
+        # # peak_val = peak_val[mask]
+        # # peak_idx = peak_idx[mask]  # keep index aligned
 
         valley_idx = []
         valley_val = []
@@ -194,7 +194,8 @@ if __name__ == "__main__":
     import json
     from matplotlib.patches import Rectangle
     plt.style.use('dark_background')
-    path = "D:/my_project/valid_data_8_2_26_resample"
+    # path = "D:/my_project/valid_data_8_2_26_resample"
+    path = "G:/My Drive/valid_data_8_2_26_resample2"
     files = [f for f in os.listdir(path) if f.endswith(".json")]
 
     n = len(files)
