@@ -20,17 +20,17 @@ def roc_curve_manual(y_true, y_score):
     TPR = []
     FPR = []
 
-    P = np.sum(y_true == 1)
-    N = np.sum(y_true == 0)
+    P = np.sum(y_true == 0)
+    N = np.sum(y_true == 1)
 
     for t in thresholds:
 
         y_pred = y_score <= t
 
-        TP = np.sum((y_pred == 1) & (y_true == 1))
-        FP = np.sum((y_pred == 1) & (y_true == 0))
-        FN = np.sum((y_pred == 0) & (y_true == 1))
-        TN = np.sum((y_pred == 0) & (y_true == 0))
+        TP = np.sum((y_pred == 0) & (y_true == 0))
+        FP = np.sum((y_pred == 0) & (y_true == 1))
+        FN = np.sum((y_pred == 1) & (y_true == 0))
+        TN = np.sum((y_pred == 1) & (y_true == 1))
 
         TPR.append(TP / P)
         FPR.append(FP / N)
@@ -95,18 +95,18 @@ def sqi(path, path_test):
     skew_test = np.array(skew_test)
 
     for i in range(len(skew_test)):
-        if skew_test[i] < min or skew_test[i] > max:
-            preds.append(0)
-        else:
+        if skew_test[i] < min or skew_test[i] > 0.8:
             preds.append(1)
+        else:
+            preds.append(0)
 
     preds = np.array(preds)
     label = np.array(label)
 
-    TP = ((preds == 1) & (label == 1)).sum().item()
-    TN = ((preds == 0) & (label == 0)).sum().item()
-    FP = ((preds == 1) & (label == 0)).sum().item()
-    FN = ((preds == 0) & (label == 1)).sum().item()
+    TP = ((preds == 0) & (label == 0)).sum().item()
+    TN = ((preds == 1) & (label == 1)).sum().item()
+    FP = ((preds == 0) & (label == 1)).sum().item()
+    FN = ((preds == 1) & (label == 0)).sum().item()
 
     print("TP:",TP)
     print("TN:",TN)
@@ -129,6 +129,12 @@ def sqi(path, path_test):
 
     print("AUC:", auc)
 
+    J = tpr - fpr
+    ix = np.argmax(J)
+
+    best_thresh = thr[ix]
+    print("Best Threshold:", best_thresh)
+
     plt.plot(fpr, tpr, label=f"AUC = {auc:.3f}")
     plt.plot([0,1],[0,1],'--')
     plt.xlabel("False Positive Rate")
@@ -139,6 +145,6 @@ def sqi(path, path_test):
     plt.show()
 
 if __name__ == "__main__":
-    path = "H:/My Drive/data_set_ppg_reject3/train"
-    path_test = "H:/My Drive/data_set_ppg_reject3/test"
+    path = "H:/My Drive/data_set_ppg_reject4/train"
+    path_test = "H:/My Drive/data_set_ppg_reject4/test"
     sqi(path, path_test)

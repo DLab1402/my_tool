@@ -11,7 +11,7 @@ aryhmias = [0]*14
 template = []
 fig, ax = plt.subplots(4, 4, figsize=(15, 6))
 ax = ax.flatten()
-path = "D:/my_project/valid_data_8_2_26_resample"
+path = "D:/my_project/valid_data_8_2_26_resample2"
 for filename in os.listdir(path):
     if filename.endswith('.json'):
         with open(os.path.join(path, filename)) as f:
