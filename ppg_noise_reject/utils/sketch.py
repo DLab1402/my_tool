@@ -3,10 +3,10 @@ import sys
 import json
 import numpy as np
 sys.path.append('D:/my_project/my_tool/ppg_noise_reject/utils')
-TRAIN_PATH = "J:/My Drive/data_set_ppg_reject4/train"
-VAL_PATH = "J:/My Drive/data_set_ppg_reject4/validate"
-TEST_PATH = "J:/My Drive/data_set_ppg_reject4/test"
-BACK_UP = "J:/My Drive/backup/"
+TRAIN_PATH = "H:/My Drive/data_set_ppg_reject4/train"
+VAL_PATH = "H:/My Drive/data_set_ppg_reject4/validate"
+TEST_PATH = "H:/My Drive/data_set_ppg_reject4/test"
+BACK_UP = "H:/My Drive/backup/"
 from template_gen import temp_find
 import matplotlib.pyplot as plt
 
@@ -228,14 +228,40 @@ def inference():
         adjust = data["adjust"]
         for i in [5,4]:
             plt.figure(figsize=(20, 4))
-            plt.plot(ppg[i][500:8500],color = "gray",label = "Prediction")
-            plt.plot(lab[i][500:8500],color = "blue",label = "Signal")
-            plt.plot(adjust[i][500:8500],color = "red",label = "Signal")
+
+            sig = np.array(ppg[i][500:8500])
+            la = np.array(lab[i][500:8500])
+            ad = np.array(adjust[i][500:8500])
         
-        plt.show()
+            x = np.arange(0, len(sig))
+
+            # Prediction (gray)
+            plt.plot(x,sig,color="#2980b9", linewidth=2, alpha=0.8, label="Prediction")
+            
+            # Ground truth (blue)
+            # plt.plot(x,la,color="#2980b9", linewidth=2.5, label="Ground Truth")
+
+            # Adjust as shaded area (red transparent band)
+            plt.fill_between(x,ad,0,where=(ad > 0),color="#e74c3c", alpha=0.2, label="Adjustment Area")
+            
+            # Titles and labels
+            # plt.title(f"PPG Signal Comparison with Adjustment Area (Sample {i})",fontsize=16, fontweight='bold')
+            plt.xlabel("Samples", fontsize=12)
+            plt.ylabel("Amplitude", fontsize=12)
+
+            # Grid
+            # plt.grid(True, linestyle='--', alpha=0.4)
+
+            # # Clean style
+            # plt.gca().spines['top'].set_visible(False)
+            # plt.gca().spines['right'].set_visible(False)
+
+            # plt.legend(loc="upper right", fontsize=11)
+            plt.tight_layout()
+            plt.show()
 
 if __name__ == "__main__":
     # loss_auc()
     # training()
-    pca()
-    # inference()
+    # pca()
+    inference()

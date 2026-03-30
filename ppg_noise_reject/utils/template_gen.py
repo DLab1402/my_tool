@@ -193,14 +193,14 @@ if __name__ == "__main__":
     import random
     import json
     from matplotlib.patches import Rectangle
-    plt.style.use('dark_background')
+    # plt.style.use('dark_background')
     # path = "D:/my_project/valid_data_8_2_26_resample"
-    path = "G:/My Drive/valid_data_8_2_26_resample2"
+    path = "H:/My Drive/valid_data_8_2_26_resample2"
     files = [f for f in os.listdir(path) if f.endswith(".json")]
 
     n = len(files)
     idx = random.randint(0, n - 1)
-    # idx = 127
+    idx = 90
     file_path = os.path.join(path, files[idx])
 
     a = temp_find()
@@ -223,7 +223,8 @@ if __name__ == "__main__":
     ax[0].plot(a.ppg)
     ax[0].set_xlim(500, 8000)
     ax[0].grid()
-    ax[0].set_title("(A)")
+    ax[0].set_title("(a)", fontsize=14, fontweight='bold')
+    ax[0].set_ylabel("Amplitude", fontsize=12)
 
     ax[1].plot(no_dc)
     ax[1].plot(peaks, no_dc[peaks], "ro")
@@ -232,17 +233,21 @@ if __name__ == "__main__":
     ax[1].set_xlim(500, 8000)
     ax[1].set_ylim(-100, 100)
     ax[1].grid()
-    ax[1].set_title("(B)")
+    ax[1].set_title("(b)", fontsize=14, fontweight='bold')
+    ax[1].set_ylabel("Amplitude", fontsize=12)
 
     final = no_dc - spline
     ax[2].plot(final)
     ax[2].set_xlim(500, 8000)
     ax[2].set_ylim(-25, 110)
     ax[2].grid()
-    ax[2].set_title("(C)")
-    valid_rec = Rectangle((f1, -100), f2-f1, 225, facecolor='red', edgecolor='none', alpha=0.3)
-    ax[2].add_patch(valid_rec)
+    ax[2].set_title("(c)", fontsize=14, fontweight='bold')
+    ax[2].set_ylabel("Amplitude", fontsize=12)
+    ax[2].set_xlabel("Samples", fontsize=12)
+    # valid_rec = Rectangle((f1, -100), f2-f1, 225, facecolor='red', edgecolor='none', alpha=0.3)
+    # ax[2].add_patch(valid_rec)
     # plt.draw()
+    plt.tight_layout()
     plt.show()
 
     # tp = no_dc[f1:f2]
