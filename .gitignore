@@ -11,3 +11,6 @@
 /data_output
 /data_zip
 /visualizations
+/MST
+/wandb
+/nnunet_knee
