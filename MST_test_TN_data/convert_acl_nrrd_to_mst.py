@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 import torch
 import torchio as tio
+from sklearn.model_selection import StratifiedKFold
 
 
 SEGMENT_TAG_PATTERN = re.compile(r"^Segment(\d+)_Tags$")
@@ -110,7 +111,8 @@ def find_studies(input_root: Path) -> list[dict[str, Any]]:
 
         seg_files = sorted(path_dir.glob("Segmentation*.seg.nrrd"))
         t2_files = sorted(
-            path for path in path_dir.glob("*.nrrd")
+            path
+            for path in path_dir.glob("*.nrrd")
             if "t2_tse_sag" in path.stem.lower() and not path.name.lower().endswith(".seg.nrrd")
         )
         if not seg_files or not t2_files:
@@ -140,14 +142,10 @@ def find_studies(input_root: Path) -> list[dict[str, Any]]:
     return studies
 
 
-def export_as_test_set(records: list[dict[str, Any]], output_root: Path) -> tuple[pd.DataFrame, dict[str, Any]]:
+def export_images(records: list[dict[str, Any]], output_root: Path) -> pd.DataFrame:
     preprocessed_root = output_root / "preprocessed"
-    path_test = preprocessed_root / "data" / "valid" / "sagittal"
-    split_root = preprocessed_root / "splits"
-    path_test.mkdir(parents=True, exist_ok=True)
-    split_root.mkdir(parents=True, exist_ok=True)
-
     rows: list[dict[str, Any]] = []
+
     for uid, record in enumerate(records):
         volume, header = nrrd.read(str(record["nrrd_path"]))
         volume = np.asarray(volume, dtype=np.float32)
@@ -157,8 +155,9 @@ def export_as_test_set(records: list[dict[str, Any]], output_root: Path) -> tupl
             tensor=torch.from_numpy(volume[None]),
             affine=affine,
         )
-        out_path = path_test / f"{uid:04d}.nii.gz"
-        image.save(out_path)
+        out_path_train = preprocessed_root / "data" / "train" / record["plane"] / f"{uid:04d}.nii.gz"
+        out_path_train.parent.mkdir(parents=True, exist_ok=True)
+        image.save(out_path_train)
 
         rows.append(
             {
@@ -170,36 +169,119 @@ def export_as_test_set(records: list[dict[str, Any]], output_root: Path) -> tupl
                 "acl": record["acl"],
                 "meniscus": record["meniscus"],
                 "Plane": record["plane"],
-                "Folder": "valid/",
-                "Split": "test",
-                "Fold": 0,
+                "Folder": "train/",
+                "BaseSplit": "cross_validation_pool",
                 "NrrdPath": str(record["nrrd_path"]),
                 "SegPath": str(record["seg_path"]),
-                "NiftiPath": str(out_path),
+                "NiftiPath": str(out_path_train),
             }
         )
 
     manifest = pd.DataFrame(rows)
     manifest.to_csv(preprocessed_root / "manifest.csv", index=False)
-    manifest.to_csv(preprocessed_root / "valid.csv", index=False)
-    manifest.to_csv(split_root / "split.csv", index=False)
+    manifest.to_csv(preprocessed_root / "train.csv", index=False)
+    manifest.iloc[0:0].to_csv(preprocessed_root / "valid.csv", index=False)
+    return manifest
 
-    summary = {
+
+def build_cv_split(manifest: pd.DataFrame, num_folds: int, random_state: int) -> pd.DataFrame:
+    train_df = manifest.reset_index(drop=True)
+
+    if train_df.empty:
+        raise ValueError("No studies were found to split.")
+
+    class_counts = train_df["acl"].value_counts()
+    min_class_count = int(class_counts.min())
+    if num_folds < 2:
+        raise ValueError("--num_folds must be at least 2.")
+    if min_class_count < num_folds:
+        raise ValueError(
+            "Not enough training samples per class for the requested number of folds. "
+            f"Smallest class in train split has {min_class_count} samples, but --num_folds={num_folds}."
+        )
+
+    skf = StratifiedKFold(n_splits=num_folds, shuffle=True, random_state=random_state)
+    split_df = train_df.copy()
+    split_df["Fold"] = -1
+    split_df["Split"] = "train"
+
+    for fold_i, (_, val_idx) in enumerate(skf.split(train_df["ID"], train_df["acl"])):
+        split_df.loc[val_idx, "Fold"] = fold_i
+
+    if (split_df["Fold"] < 0).any():
+        raise RuntimeError("Some studies were not assigned to any fold.")
+
+    return split_df[
+        [
+            "ID",
+            "PatientKey",
+            "RawLabel",
+            "AclLabelName",
+            "abnormal",
+            "acl",
+            "meniscus",
+            "Plane",
+            "Folder",
+            "BaseSplit",
+            "Split",
+            "Fold",
+            "NrrdPath",
+            "SegPath",
+            "NiftiPath",
+        ]
+    ]
+
+
+def build_summary(manifest: pd.DataFrame, split_df: pd.DataFrame, num_folds: int) -> dict[str, Any]:
+    fold_summaries: list[dict[str, Any]] = []
+    for fold_i in range(num_folds):
+        fold_val = split_df[split_df["Fold"] == fold_i]
+        fold_train = split_df[split_df["Fold"] != fold_i]
+        fold_summaries.append(
+            {
+                "fold": fold_i,
+                "num_train": int(len(fold_train)),
+                "num_val": int(len(fold_val)),
+                "class_distribution_train": dict(sorted(Counter(fold_train["acl"]).items())),
+                "class_distribution_val": dict(sorted(Counter(fold_val["acl"]).items())),
+            }
+        )
+
+    return {
         "num_total": int(len(manifest)),
-        "num_test": int(len(manifest)),
         "class_distribution_total": dict(sorted(Counter(manifest["acl"]).items())),
-        "export_mode": "all_test",
-        "fold": 0,
+        "num_folds": num_folds,
+        "folds": fold_summaries,
     }
+
+
+def export_dataset(
+    records: list[dict[str, Any]],
+    output_root: Path,
+    num_folds: int,
+    random_state: int,
+) -> tuple[pd.DataFrame, pd.DataFrame, dict[str, Any]]:
+    manifest = export_images(records, output_root)
+
+    split_root = output_root / "preprocessed" / "splits"
+    split_root.mkdir(parents=True, exist_ok=True)
+
+    split_df = build_cv_split(manifest, num_folds=num_folds, random_state=random_state)
+    split_df.to_csv(split_root / "split.csv", index=False)
+
+    summary = build_summary(manifest, split_df, num_folds=num_folds)
     with open(split_root / "summary.json", "w", encoding="utf-8") as file:
         json.dump(summary, file, indent=2)
 
-    return manifest, summary
+    return manifest, split_df, summary
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Convert sagittal ACL .nrrd studies into an MST MRNet-style test-only dataset."
+        description=(
+            "Convert sagittal ACL .nrrd studies into an MST MRNet-style dataset with "
+            "train/valid export and K-fold cross-validation metadata."
+        )
     )
     parser.add_argument(
         "--input_root",
@@ -212,6 +294,18 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         required=True,
         help="Output root. The script will create <output_root>/preprocessed/...",
+    )
+    parser.add_argument(
+        "--num_folds",
+        type=int,
+        default=5,
+        help="Number of stratified cross-validation folds created from the full dataset. Default: 5",
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=0,
+        help="Random seed used for K-fold shuffle. Default: 0",
     )
     return parser.parse_args()
 
@@ -226,12 +320,21 @@ def main() -> None:
             "Expected folders containing both '*t2_tse_sag*.nrrd' and 'Segmentation*.seg.nrrd'."
         )
 
-    manifest, summary = export_as_test_set(studies, args.output_root)
+    manifest, split_df, summary = export_dataset(
+        studies,
+        args.output_root,
+        num_folds=args.num_folds,
+        random_state=args.seed,
+    )
 
-    print(f"Exported {len(manifest)} studies to {args.output_root / 'preprocessed'}")
-    print(f"Manifest: {args.output_root / 'preprocessed' / 'manifest.csv'}")
-    print(f"Split:    {args.output_root / 'preprocessed' / 'splits' / 'split.csv'}")
-    print("Class distribution:", summary["class_distribution_total"])
+    preprocessed_root = args.output_root / "preprocessed"
+    print(f"Exported {len(manifest)} studies to {preprocessed_root}")
+    print(f"Manifest:   {preprocessed_root / 'manifest.csv'}")
+    print(f"Train CSV:  {preprocessed_root / 'train.csv'}")
+    print(f"Valid CSV:  {preprocessed_root / 'valid.csv'}")
+    print(f"Split CSV:  {preprocessed_root / 'splits' / 'split.csv'}")
+    print(f"Rows in split.csv: {len(split_df)}")
+    print("Class distribution total:", summary["class_distribution_total"])
 
 
 if __name__ == "__main__":
