@@ -19,7 +19,7 @@ class temp_find:
         s = np.array(self.ppg)
 
         lowcut = 0.5
-        highcut = 3
+        highcut = 10
         order = 4
 
         b, a = butter(order, [lowcut/(fs/2), highcut/(fs/2)], btype='band')
@@ -183,7 +183,7 @@ class temp_find:
         b = signal[-1]
         c = a*np.arange(len(signal))+b
         y = signal - c
-        y_smooth = savgol_filter(y, window_length=11, polyorder=3)
+        y_smooth = savgol_filter(y, window_length=8, polyorder=3)
         resam = resample(y_smooth, num_points)
         return resam
 #Test
