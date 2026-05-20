@@ -97,7 +97,7 @@ class temp_find:
         b = signal[-1]
         c = a*np.arange(len(signal))+b
         y = signal - c
-        y_smooth = savgol_filter(y, window_length=8, polyorder=3)
+        y_smooth = savgol_filter(y, window_length=4, polyorder=3)
         resam = resample(y_smooth, num_points)
         return resam
 #Test
