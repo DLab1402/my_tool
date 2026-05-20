@@ -18,65 +18,17 @@ class temp_find:
         t = np.arange(N) / fs
         s = np.array(self.ppg)
 
-        lowcut = 0.5
-        highcut = 10
-        order = 4
+        # lowcut = 0.5
+        # highcut = 10
+        # order = 4
 
-        b, a = butter(order, [lowcut/(fs/2), highcut/(fs/2)], btype='band')
-        filtered = filtfilt(b, a, s)
+        # b, a = butter(order, [lowcut/(fs/2), highcut/(fs/2)], btype='band')
+        # filtered = filtfilt(b, a, s)
+
+        filtered = self.dc_take(s)
 
         _, results = nk.ppg_peaks(filtered, sampling_rate=fs)
         peak_idx = results["PPG_Peaks"]
-
-        # peak_idx = np.array(peak_idx)
-        # peak_val = [filtered[i] for i in peak_idx]
-
-        # peak_val = np.array(peak_val)
-
-
-        # interval = np.diff(peak_idx)
-        # # plt.plot(interval)
-        # # plt.show()
-        # valid = peak_idx.copy()  # copy to mark valid peaks
-
-        # for i in range(len(peak_idx)-1):
-        #     start = peak_idx[i]
-        #     end = peak_idx[i + 1]
-
-        #     # segment between two peaks
-        #     segment = filtered[start:end]
-
-            
-        #     # find local minimum in that segment
-        #     local_min_index = np.argmin(segment)
-        #     h1 = peak_val[i] - segment[local_min_index]
-        #     h2 = peak_val[i+1] - segment[local_min_index]
-            
-        #     if interval[i] < 0.4*fs:  # less than 0.5 seconds                    
-        #         if peak_val[i] > peak_val[i+1]:
-        #             valid[i+1] = -1  # mark for removal
-            
-        #     if fs > interval[i] and interval[i] >= 0.4*fs:  # greater than 2 seconds
-        #         if h2/h1 < 0.7:  # if the next peak is not significantly higher than the current one
-        #             valid[i+1] = -1  # mark for removal
-        #         # else:
-        #         #     valid[i] = -1  # mark for removal
-            
-
-        # # Remove marked peaks        peak_idx = peak_idx[peak_idx != -1]
-        # peak_val = [filtered[i] for i in valid if i != -1]
-        # # print("peak_val:", peak_val)
-        # peak_idx = np.array([i for i in valid if i != -1])
-        # # X = peak_val.reshape(-1, 1)
-
-        # # clf = IsolationForest(contamination=0.05)  # tune this
-        # # labels = clf.fit_predict(X)
-
-        # # # keep normal points (label = 1)
-        # # mask = np.where(labels == 1)
-
-        # # peak_val = peak_val[mask]
-        # # peak_idx = peak_idx[mask]  # keep index aligned
 
         valley_idx = []
         valley_val = []
@@ -100,49 +52,11 @@ class temp_find:
         valley_idx = np.array(valley_idx)
         valley_val = np.array(valley_val)
 
-        # # Compute gradient around each valley
-        # grad_left = []
-        # grad_right = []
-
-        # for i, idx in enumerate(valley_idx[1:-1]):
-        #     x1 = valley_idx[i-1]  # previous valley
-        #     x2 = valley_idx[i + 1]  # next valley
-        #     y1 = valley_val[i-1]  # previous valley value
-        #     y2 = valley_val[i + 1]  # next valley value
-        #     g_left = (valley_val[i] - y1) / (idx - x1)
-        #     g_right = (y2 - valley_val[i]) / (x2 - idx)
-
-        #     grad_left.append(g_left)
-        #     grad_right.append(g_right)
-
-        # grad_left = np.array(grad_left)
-        # grad_right = np.array(grad_right)
-
-        # # print("grad_left:", grad_left)
-        # # print("grad_right:", grad_right)
-
-        # threshold = 0.00001  # tune this based on your signal scale
-
-        # valid_indices = []
-
-        # for i in range(len(valley_idx[1:-1])):
-        #     g_left = grad_left[i]
-        #     g_right = grad_right[i]
-
-        #     # Reject abnormal valleys
-        #     if (g_left > threshold) and (g_right > -threshold):
-        #         continue  # skip this one (eject)
-
-        #     valid_indices.append(i)
-        
-        # valley_idx = valley_idx[valid_indices]
-
-
         temp = []
-        no_dc = self.dc_take(s)
-        no_base = no_dc-self.spline(valley_idx, no_dc)
+        # no_dc = self.dc_take(s)
+        # no_base = no_dc-self.spline(valley_idx, no_dc)
         for i in range(len(valley_idx)-1):
-            a = self.liesample(no_base[valley_idx[int(i)]:valley_idx[int(i+1)]],self.num) 
+            a = self.liesample(filtered[valley_idx[int(i)]:valley_idx[int(i+1)]],self.num) 
             temp.append(a)
 
         
@@ -155,14 +69,14 @@ class temp_find:
     
     def dc_take(self,raw_signal):
         fs = self.ppg_fre# <-- CHANGE THIS to your real sampling rate
-        low = 0.03
-        high = 5
+        low = 0.5
+        high = 10
 
         # Normalize frequencies (required by scipy)
         low_norm = low / (fs / 2)
         high_norm = high / (fs / 2)
 
-        order = 1         # filter order
+        order = 4         # filter order
         ripple = 0.1      # dB ripple in passband
 
         b, a = cheby2(order, ripple, [low_norm, high_norm], btype='band')
