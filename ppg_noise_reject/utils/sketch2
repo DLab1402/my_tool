@@ -7,8 +7,8 @@ TRAIN_PATH = "H:/My Drive/data_set_ppg_reject4/train"
 VAL_PATH = "H:/My Drive/data_set_ppg_reject4/validate"
 TEST_PATH = "H:/My Drive/data_set_ppg_reject4/test"
 BACK_UP = "H:/My Drive/backup/"
-my_publish/ppg_denoise/review/propose_model/
-DATA_PATH = "H:/My Drive/data_set_ppg_reject4-Copy/proposed"
+
+DATA_PATH = "G:/My Drive/Target_in_2026/D.Lab/my_publish/ppg_denoise/review/propose_model"
 from template_gen import temp_find
 import matplotlib.pyplot as plt
 
