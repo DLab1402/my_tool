@@ -2,9 +2,9 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 
-TRAIN_PATH = r"G:\My Drive\Target_in_2026\D.Lab\my_publish\ppg_denoise\review\propose_model\train.json"
-VAL_PATH = r"G:\My Drive\Target_in_2026\D.Lab\my_publish\ppg_denoise\review\propose_model\validate.json"
-TEST_PATH = r"G:\My Drive\Target_in_2026\D.Lab\my_publish\ppg_denoise\review\propose_model\inferent.json"
+TRAIN_PATH = r"G:\My Drive\Target_in_2026\D.Lab\my_publish\ppg_denoise\review\same_kernel\train.json"
+VAL_PATH = r"G:\My Drive\Target_in_2026\D.Lab\my_publish\ppg_denoise\review\same_kernel\validate.json"
+TEST_PATH = r"G:\My Drive\Target_in_2026\D.Lab\my_publish\ppg_denoise\review\same_kernel\inferent.json"
 
 with open(TRAIN_PATH, "r") as f:
     data = json.load(f)

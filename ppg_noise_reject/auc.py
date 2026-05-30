@@ -3,8 +3,8 @@ import numpy as np
 from scipy.stats import skew
 import matplotlib.pyplot as plt
 
-INFERENT_PATH = r"G:\My Drive\Target_in_2026\D.Lab\my_publish\ppg_denoise\review\propose_model\inferent.json"
-DISEASE_PATH = r"G:\My Drive\Target_in_2026\D.Lab\my_publish\ppg_denoise\review\propose_model\disease.json"
+INFERENT_PATH = r"G:\My Drive\Target_in_2026\D.Lab\my_publish\ppg_denoise\review\same_kernel\inferent.json"
+DISEASE_PATH = r"G:\My Drive\Target_in_2026\D.Lab\my_publish\ppg_denoise\review\same_kernel\disease.json"
 
 with open(INFERENT_PATH, "r") as f:
     data = json.load(f)

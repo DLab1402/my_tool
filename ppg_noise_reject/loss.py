@@ -1,10 +1,11 @@
 import json
 from scipy import stats
 import matplotlib.pyplot as plt
+from scipy.stats import wasserstein_distance
 
-TRAIN_PATH = r"G:\My Drive\Target_in_2026\D.Lab\my_publish\ppg_denoise\review\propose_model\train.json"
-VAL_PATH = r"G:\My Drive\Target_in_2026\D.Lab\my_publish\ppg_denoise\review\propose_model\validate.json"
-TEST_PATH = r"G:\My Drive\Target_in_2026\D.Lab\my_publish\ppg_denoise\review\propose_model\inferent.json"
+TRAIN_PATH = r"G:\My Drive\Target_in_2026\D.Lab\my_publish\ppg_denoise\review\same_kernel\train.json"
+VAL_PATH = r"G:\My Drive\Target_in_2026\D.Lab\my_publish\ppg_denoise\review\same_kernel\validate.json"
+TEST_PATH = r"G:\My Drive\Target_in_2026\D.Lab\my_publish\ppg_denoise\review\same_kernel\inferent.json"
 
 def check_similarity_anderson(data1, data2):
     # Thực hiện kiểm định Anderson-Darling cho 2 mẫu
@@ -36,6 +37,23 @@ def check_similarity_anderson(data1, data2):
     return result
 
 
+def calculate_wasserstein_distance(data1, data2, label1="Distribution 1", label2="Distribution 2"):
+    """
+    Calculate Wasserstein distance between two distributions
+    
+    Args:
+        data1: First dataset (list or array)
+        data2: Second dataset (list or array)
+        label1: Name of first distribution
+        label2: Name of second distribution
+    
+    Returns:
+        float: Wasserstein distance
+    """
+    wd = wasserstein_distance(data1, data2)
+    print(f"Wasserstein distance ({label1} vs {label2}): {wd}")
+    return wd
+
 with open(TRAIN_PATH, "r") as f:
     data = json.load(f)
     loss_train = data["loss"]
@@ -49,14 +67,16 @@ with open(TEST_PATH, "r") as f:
     loss_test = data["loss"]
 
 print(check_similarity_anderson(loss_train, loss_val))
+calculate_wasserstein_distance(loss_train, loss_val, "Training Loss", "Validation Loss")
 
-plt.hist(loss_train, bins=30, alpha=0.5, label="Training Loss")
-plt.hist(loss_val, bins=30, alpha=0.5, label="Validation Loss")
-# plt.hist(loss_test, bins=30, alpha=0.5, label="Test Loss")
-
+plt.hist(loss_train, bins=500, alpha=0.5, label="Training Loss")
+plt.hist(loss_val, bins=500, alpha=0.5, label="Validation Loss")
+# plt.hist(loss_test, bins=50, alpha=0.5, label="Test Loss")
+plt.xlim(0, 0.0005)
 plt.xlabel("Loss Value")
 plt.ylabel("Frequency")
-# plt.title("Distribution of Loss Values")
+plt.title("Distribution of Loss Values")
+plt.grid()
 plt.legend()
 plt.show()
 

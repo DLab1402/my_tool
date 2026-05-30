@@ -47,20 +47,20 @@ def sqi(path, path_test):
         file_path = os.path.join(path, file)
         with open(file_path, "r") as f:
             data = json.load(f)
-        if "Template" in data:
-            template = data["Template"]
+        if "Test" in data:
+            template = data["Test"]
             for temp in template:
-                if temp["Valid"]:
+                if temp["Valid"] != 0:
                     skew_train.append(skew(temp["Temp"]))
                     temp_train.append(temp["Temp"])
                     p1,p2 = temp["Pos"]
-                    n = np.max(data["Syn_Label"][p1:p2])
+                    n = temp["Valid"]
                     dis_train.append(n)       
 
     skew_train = np.array(skew_train)
     dis_train = np.array(dis_train)
-    id0 = np.where(dis_train == 0)[0]
-    id1 = np.where(dis_train != 0)[0]
+    id0 = np.where(dis_train == 1)[0]
+    id1 = np.where(dis_train != 1)[0]
 
 
     fig, ax = plt.subplots(1, 3, figsize=(15, 5))
@@ -90,23 +90,23 @@ def sqi(path, path_test):
             for temp in template:
                 skew_test.append(skew(temp["Temp"]))
                 temp_test.append(temp["Temp"])
-                label.append(temp["Valid"])
+                label.append(temp["Valid"] != 0)
 
     skew_test = np.array(skew_test)
 
     for i in range(len(skew_test)):
-        if skew_test[i] < min or skew_test[i] > 0.8:
-            preds.append(1)
-        else:
+        if skew_test[i] < min or skew_test[i] > 1:
             preds.append(0)
+        else:
+            preds.append(1)
 
     preds = np.array(preds)
     label = np.array(label)
 
-    TP = ((preds == 0) & (label == 0)).sum().item()
-    TN = ((preds == 1) & (label == 1)).sum().item()
-    FP = ((preds == 0) & (label == 1)).sum().item()
-    FN = ((preds == 1) & (label == 0)).sum().item()
+    TP = ((preds == 1) & (label == 1)).sum().item()
+    TN = ((preds == 0) & (label == 0)).sum().item()
+    FP = ((preds == 1) & (label == 0)).sum().item()
+    FN = ((preds == 0) & (label == 1)).sum().item()
 
     print("TP:",TP)
     print("TN:",TN)
@@ -145,6 +145,6 @@ def sqi(path, path_test):
     plt.show()
 
 if __name__ == "__main__":
-    path = "H:/My Drive/data_set_ppg_reject4/train"
-    path_test = "H:/My Drive/data_set_ppg_reject4/test"
+    path = r"H:\My Drive\data_set_review\data_run\train"
+    path_test = r"H:\My Drive\data_set_review\data_run\test"
     sqi(path, path_test)

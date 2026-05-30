@@ -4,8 +4,8 @@ import shutil
 import random
 
 # ======= CHANGE THESE =======
-src_folder = "D:/my_project/valid_data_8_2_26_resample2"
-out_root = "D:/my_project/data_set_ppg_reject3"
+src_folder = r"H:\My Drive\data_set_review\data_notem"
+out_root = r"H:\My Drive\data_set_review\data_run"
 
 train_ratio = 0.5
 val_ratio = 0.25
@@ -29,14 +29,14 @@ for fname in os.listdir(src_folder):
         with open(full_path, "r") as f:
             data = json.load(f)
 
-        # check if it has "Template"
-        if isinstance(data, dict) and "Template" in data:
+        # check if it has "Test"
+        if isinstance(data, dict) and "Test" in data:
             valid_files.append(fname)
 
     except Exception as e:
         print(f"Skipping {fname} (error reading): {e}")
 
-print(f"Total valid JSON with 'Template': {len(valid_files)}")
+print(f"Total valid JSON with 'Test': {len(valid_files)}")
 
 # shuffle before splitting
 random.shuffle(valid_files)
