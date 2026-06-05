@@ -4,12 +4,12 @@ from scipy.stats import skew
 import matplotlib.pyplot as plt
 
 INFERENT_PATH = r"G:\My Drive\Target_in_2026\D.Lab\my_publish\ppg_denoise\review\same_kernel\inferent.json"
-DISEASE_PATH = r"G:\My Drive\Target_in_2026\D.Lab\my_publish\ppg_denoise\review\same_kernel\disease.json"
 
 with open(INFERENT_PATH, "r") as f:
     data = json.load(f)
-    pred = np.array(data["predict"])
+    pred = np.array(data["predict"])    
     lab = np.array(data["label"])
+    lab = lab.flatten()
     loss = np.array(data["loss"])
 
 def compute_auc(fpr, tpr):
@@ -40,8 +40,6 @@ TP = np.sum((pred == 1) & (lab == 1))
 FP = np.sum((pred == 1) & (lab == 0))
 FN = np.sum((pred == 0) & (lab == 1))
 TN = np.sum((pred == 0) & (lab == 0))
-
-
 
 print("TP:",TP)
 print("TN:",TN)

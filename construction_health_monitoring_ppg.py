@@ -8,7 +8,7 @@ class construction_health_monitoring_ppg(nn.Module):
     """
     Deep Convolutional Autoencoder network exactly as described by Gautam & Jebelli (2024).
     """
-    def __init__(self, input_len=128, latent_dim=4):
+    def __init__(self, input_len=800, latent_dim=4):
         super(construction_health_monitoring_ppg, self).__init__()
         self.input_len = input_len
         self.latent_dim = latent_dim
@@ -19,7 +19,7 @@ class construction_health_monitoring_ppg(nn.Module):
         # 1. ENCODER
         # ==========================================
         # Conv_Block_1: Conv1D (8 filters, kernel=5, padding='same') -> BN -> ReLU -> MaxPool (pool=2)
-        # Input shape: (B, 1, 128) -> Output shape: (B, 8, 64)
+        # Input shape: (B, 1, 800) -> Output shape: (B, 8, 400)
         self.enc_conv1 = nn.Sequential(
             nn.Conv1d(in_channels=1, out_channels=8, kernel_size=5, padding='same'),
             nn.BatchNorm1d(num_features=8),
@@ -28,7 +28,7 @@ class construction_health_monitoring_ppg(nn.Module):
         )
 
         # Conv_Block_2: Conv1D (16 filters, kernel=3, padding='same') -> BN -> ReLU -> MaxPool (pool=2)
-        # Input shape: (B, 8, 64) -> Output shape: (B, 16, 32)
+        # Input shape: (B, 8, 400) -> Output shape: (B, 16, 200)
         self.enc_conv2 = nn.Sequential(
             nn.Conv1d(in_channels=8, out_channels=16, kernel_size=3, padding='same'),
             nn.BatchNorm1d(num_features=16),
@@ -36,7 +36,7 @@ class construction_health_monitoring_ppg(nn.Module):
             nn.MaxPool1d(kernel_size=2, stride=2)
         )
 
-        # Calculate flattened dimension: 16 channels * (input_len // 4) = 16 * 32 = 512
+        # Calculate flattened dimension: 16 channels * (input_len // 4) = 16 * 200 = 3200
         self.flattened_dim = 16 * (input_len // 4)
 
         # Dense_1: 16 units, ReLU activation

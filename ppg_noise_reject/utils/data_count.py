@@ -2,7 +2,7 @@ import os
 import json
 import numpy as np
 
-out_root = "H:/My Drive/data_set_ppg_reject4/"
+out_root =r"H:\My Drive\data_set_review\data_run"
 
 def counter(path, type="other"):
 # collect only json files that contain "Template"
@@ -22,9 +22,9 @@ def counter(path, type="other"):
                 data = json.load(f)
 
             # check if it has "Template"
-            if type == "test":
-                if "Test" not in data:
-                    continue
+            # if type == "test":
+            #     if "Test" not in data:
+            #         continue
             if isinstance(data, dict) and "Test" in data:
                 if "Label" in data:
                     if np.sum(data["Label"]) == 0:
@@ -54,12 +54,12 @@ def counter(path, type="other"):
     print(f"Total tem_p: {tem_p}")
 
 if __name__ == "__main__":
-    # print("Counting in train set:")
-    # train_path = os.path.join(out_root, "train")
-    # counter(train_path) 
-    # print("\nCounting in validate set:")
-    # val_path = os.path.join(out_root, "validate")
-    # counter(val_path)
+    print("Counting in train set:")
+    train_path = os.path.join(out_root, "train")
+    counter(train_path) 
+    print("\nCounting in validate set:")
+    val_path = os.path.join(out_root, "validate")
+    counter(val_path)
     print("\nCounting in test set:")
     test_path = os.path.join(out_root, "test")
-    counter(test_path,"test")
+    counter(test_path)
