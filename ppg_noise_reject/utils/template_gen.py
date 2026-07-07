@@ -109,12 +109,13 @@ if __name__ == "__main__":
     from matplotlib.patches import Rectangle
     # plt.style.use('dark_background')
     # path = "D:/my_project/valid_data_8_2_26_resample"
-    path = "H:/My Drive/valid_data_8_2_26_resample2"
+    # path = "H:/My Drive/valid_data_8_2_26_resample2"
+    path = "/mnt/my_volume/my_data/data/data_notem"
     files = [f for f in os.listdir(path) if f.endswith(".json")]
 
     n = len(files)
     idx = random.randint(0, n - 1)
-    idx = 90
+    # idx = 90
     file_path = os.path.join(path, files[idx])
 
     a = temp_find()
@@ -160,7 +161,7 @@ if __name__ == "__main__":
     ax[2].set_xlabel("Samples", fontsize=12)
     # valid_rec = Rectangle((f1, -100), f2-f1, 225, facecolor='red', edgecolor='none', alpha=0.3)
     # ax[2].add_patch(valid_rec)
-    # plt.draw()
+    plt.draw()
     plt.tight_layout()
     plt.show()
 

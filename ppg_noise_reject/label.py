@@ -299,16 +299,16 @@ class MainWindow(QWidget):
         ax.set_ylim(-0.2, 1.2)
         ax.set_ylabel("PPG (norm)", color="steelblue", fontsize=8)
         ax.tick_params(axis='y', labelcolor="steelblue")
-        ax.plot(x, np.array(self.cur_sig), color="steelblue", linewidth=1, label="PPG")
+        ax.plot(x, np.array(self.cur_sig), color="steelblue", linewidth=1, label="Normalized PPG")
         ax.plot(self.cur_peak[0], self.cur_peak[1],
                 marker='o', linestyle='None',
-                color='green', markerfacecolor='green', markersize=5, label="PPG peaks")
+                color='green', markerfacecolor='green', markersize=5, label="PPG feet")
 
         # Label is optional
         if self.cur_label is not None:
             label_arr = np.array(self.cur_label)
             if len(label_arr) == n:          # sanity-check length matches PPG
-                ax.plot(x, label_arr, color="red", linewidth=0.8, alpha=0.7, label="Label")
+                ax.plot(x, label_arr, color="red", linewidth=2, alpha=0.7, label="Label")
 
         # --- ECG (secondary axis, orange) — cur_ecg is always shape (ppg_len,) ---
         if ax2 is not None and self.cur_ecg is not None:
@@ -316,8 +316,7 @@ class MainWindow(QWidget):
                 f"ECG length {len(self.cur_ecg)} != PPG length {n}"  # should never fire
             ax2.set_xlim(0, n)
             ax2.set_ylim(-0.2, 1.2)
-            ax2.plot(x, self.cur_ecg, color="darkorange", linewidth=0.8,
-                     alpha=0.75, label="ECG (aligned)")
+            ax2.plot(x, self.cur_ecg, color="darkorange", linewidth=0.8, alpha=0.75, label="Aligned ECG")
 
             # R-peaks markers on ECG axis
             if self.cur_r_peaks is not None and len(self.cur_r_peaks) > 0:
@@ -361,6 +360,6 @@ class MainWindow(QWidget):
 # ======================
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = MainWindow("H:\\My Drive\\data_set_review\\data_notem")
+    window = MainWindow("/mnt/my_volume/my_data/data/data_notem")
     window.show()
     sys.exit(app.exec())
